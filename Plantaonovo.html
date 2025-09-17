@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Escalonamento - Squads</title>
+  <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    header {
+      background: #0046ad; /* Azul Magazine Luiza */
+      color: white;
+      padding: 1rem;
+      text-align: center;
+    }
+    main {
+      padding: 1rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    .squad {
+      background: white;
+      margin: 1rem 0;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    button, label {
+      background: #00a859; /* Verde Magazine Luiza */
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 0.2rem;
+    }
+    button:hover, label:hover {
+      opacity: 0.85;
+    }
+    input[type="file"] {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Escalonamento de Plantão</h1>
+    <label>
+      Importar CSV/JSON
+      <input type="file" accept=".json,.csv" onchange="handleImport(event)">
+    </label>
+  </header>
+  <main id="root"></main>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    const initialData = {
+      squads: [
+        { id: "1", name: "Squad Checkout" },
+        { id: "2", name: "Squad Pagamentos" }
+      ],
+      oncalls: [
+        { id: "a", squadId: "1", personName: "Gustavo", phone: "11999999999", hours: "19:00-07:00" },
+        { id: "b", squadId: "2", personName: "Maria", phone: "11888888888", hours: "07:00-19:00" }
+      ]
+    };
+
+    function App() {
+      const [data, setData] = useState(initialData);
+
+      // Import JSON
+      function importJson(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result);
+            if (parsed.squads && parsed.oncalls) {
+              setData(parsed);
+              alert("JSON importado com sucesso!");
+            } else {
+              alert("Formato inválido no JSON.");
+            }
+          } catch {
+            alert("Erro ao ler JSON.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // Import CSV
+      function importCsv(file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const text = reader.result;
+            const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+            const [header, ...rows] = lines;
+            const cols = header.split(",");
+            const oncalls = rows.map(row => {
+              const values = row.split(",");
+              const obj = {};
+              cols.forEach((c, i) => obj[c.trim()] = values[i]?.trim());
+              return {
+                id: Math.random().toString(36).substr(2,9),
+                squadId: obj.squadId || "1",
+                personName: obj.personName || "",
+                phone: obj.phone || "",
+                hours: obj.hours || ""
+              };
+            });
+            setData({ ...data, oncalls: [...data.oncalls, ...oncalls] });
+            alert("CSV importado com sucesso!");
+          } catch {
+            alert("Erro ao importar CSV.");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // Função global para input file
+      window.handleImport = (e) => {
+        const f = e.target.files?.[0];
+        if (f) {
+          if (f.name.endsWith(".json")) importJson(f);
+          else if (f.name.endsWith(".csv")) importCsv(f);
+        }
+        e.target.value = "";
+      };
+
+      return (
+        <div>
+          {data.squads.map(squad => (
+            <div key={squad.id} className="squad">
+              <h2>{squad.name}</h2>
+              <ul>
+                {data.oncalls
+                  .filter(o => o.squadId === squad.id)
+                  .map(o => (
+                    <li key={o.id}>
+                      {o.personName} — {o.phone} ({o.hours})
+                    </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById("root"));
+  </script>
+</body>
+</html>

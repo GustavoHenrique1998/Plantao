@@ -1,0 +1,148 @@
+/* ==========================
+   Cores inspiradas no Magazine Luiza
+   - Roxo primário: #6D1EFF
+   - Roxo secundário: #A178FF
+   - Branco: #FFFFFF
+   - Cinza claro: #F5F5F5
+   - Cinza escuro: #333333
+   ========================== */
+
+/* Reset simples */
+body, h1, h2, h3, h4, h5, h6, p, div, span, input, button {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Body */
+body {
+  background-color: #F5F5F5;
+  color: #333333;
+  min-height: 100vh;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #6D1EFF;
+  color: #FFFFFF;
+  padding: 12px 20px;
+  border-bottom: 2px solid #A178FF;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  background-color: #A178FF;
+  display: grid;
+  place-items: center;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+/* Header buttons */
+.header-buttons button {
+  background-color: #FFFFFF;
+  color: #6D1EFF;
+  border: none;
+  padding: 6px 12px;
+  margin-left: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.header-buttons button:hover {
+  background-color: #EDE7FF;
+}
+
+/* Main content */
+.main-content {
+  padding: 20px;
+}
+
+/* Squad list */
+.squad-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.squad-card {
+  background-color: #FFFFFF;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.squad-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.squad-card button {
+  background-color: #6D1EFF;
+  color: #FFFFFF;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.squad-card button:hover {
+  background-color: #A178FF;
+}
+
+/* Oncalls list */
+.oncalls-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.oncalls-card {
+  background-color: #FFFFFF;
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #6D1EFF;
+  color: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #A178FF;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #6D1EFF;
+  color: #FFFFFF;
+  padding: 10px 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-weight: 500;
+}
