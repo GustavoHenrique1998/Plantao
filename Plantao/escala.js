@@ -1,5 +1,6 @@
 function EscalationApp() {
-        // O estado agora começa vazio e será preenchido com dados do Firebase
+        
+  // O estado agora começa vazio e será preenchido com dados do Firebase
         const [squads, setSquads] = useState([]);
         const [oncalls, setOnCalls] = useState([]);
 
@@ -113,5 +114,6 @@ function EscalationApp() {
             <footer> {/* ... seu footer ... */} </footer>
             {toast && <Toast message={toast} onClose={() => setToast(null)} />}
           </div>
+          
         );
       }
