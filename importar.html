@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Importar Dados — Plantão Magalu</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #0E89FF;
+      --blue-dark: #0066CC;
+      --blue-dim: #0E89FF22;
+      --green: #00C48C;
+      --green-dim: #00C48C22;
+      --red: #FF4D4D;
+      --red-dim: #FF4D4D18;
+      --yellow: #FFC000;
+      --yellow-dim: #FFC00018;
+      --bg: #0B0F17;
+      --bg2: #111827;
+      --bg3: #1a2235;
+      --border: #1e2d45;
+      --text: #E8EDF5;
+      --text-dim: #6b7a99;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* GRID BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+
+    /* HEADER */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .logo-badge {
+      width: 44px; height: 44px;
+      background: var(--blue);
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 0 24px #0E89FF55;
+    }
+    header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    header p {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+    .back-btn {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: all .2s;
+      font-family: var(--sans);
+      background: transparent;
+      cursor: pointer;
+    }
+    .back-btn:hover { color: var(--text); border-color: var(--blue); }
+
+    /* CREDENTIALS */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--blue);
+      font-family: var(--mono);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title::before {
+      content: '';
+      display: block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 8px var(--blue);
+    }
+
+    .fields-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) { .fields-row { grid-template-columns: 1fr; } }
+
+    label { font-size: 12px; color: var(--text-dim); display: block; margin-bottom: 6px; }
+    input[type=text], input[type=password] {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    input:focus { border-color: var(--blue); }
+
+    /* TABS */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all .2s;
+      color: var(--text-dim);
+      border: none;
+      background: transparent;
+      font-family: var(--sans);
+    }
+    .tab.active {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 0 16px #0E89FF44;
+    }
+
+    /* DROPZONE */
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .2s;
+      background: var(--bg2);
+      position: relative;
+    }
+    .dropzone:hover, .dropzone.drag { border-color: var(--blue); background: var(--blue-dim); }
+    .dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+    .dropzone-icon { font-size: 40px; margin-bottom: 12px; }
+    .dropzone h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .dropzone p { font-size: 13px; color: var(--text-dim); }
+    .file-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--blue-dim);
+      border: 1px solid var(--blue);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-family: var(--mono);
+      color: var(--blue);
+      margin-top: 12px;
+    }
+
+    /* CSV TEMPLATE */
+    .csv-template {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .csv-template p { font-size: 12px; color: var(--text-dim); margin-bottom: 8px; }
+    .csv-template code {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--green);
+      display: block;
+      line-height: 1.8;
+    }
+
+    /* PREVIEW TABLE */
+    .preview-section { margin-top: 24px; }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .preview-header h2 { font-size: 15px; font-weight: 600; }
+    .count-badge {
+      font-size: 12px;
+      font-family: var(--mono);
+      background: var(--blue-dim);
+      color: var(--blue);
+      border: 1px solid var(--blue);
+      border-radius: 20px;
+      padding: 3px 12px;
+    }
+
+    .squad-block { margin-bottom: 16px; }
+    .squad-name {
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--yellow);
+      background: var(--yellow-dim);
+      border: 1px solid #FFC00033;
+      border-radius: 6px;
+      padding: 6px 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-family: var(--mono);
+      padding: 8px 12px;
+      text-align: left;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--bg3); }
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-family: var(--mono);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+    .tag-lead { background: #FFC00022; color: var(--yellow); border: 1px solid #FFC00033; }
+    .tag-plantao { background: var(--blue-dim); color: var(--blue); border: 1px solid #0E89FF33; }
+
+    /* IMPORT BTN */
+    .import-bar {
+      position: sticky;
+      bottom: 0;
+      background: linear-gradient(to top, var(--bg) 60%, transparent);
+      padding: 24px 0 8px;
+      margin-top: 32px;
+    }
+    .btn-import {
+      width: 100%;
+      padding: 16px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--sans);
+      transition: all .2s;
+      box-shadow: 0 0 32px #0E89FF44;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .btn-import:hover { background: var(--blue-dark); box-shadow: 0 0 40px #0E89FF66; }
+    .btn-import:disabled { background: var(--border); color: var(--text-dim); box-shadow: none; cursor: not-allowed; }
+
+    /* PROGRESS */
+    .progress-wrap {
+      background: var(--bg3);
+      border-radius: 8px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 8px;
+      transition: width .3s;
+      box-shadow: 0 0 12px var(--blue);
+      width: 0%;
+    }
+
+    /* LOG */
+    .log-area {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.8;
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 16px;
+    }
+    .log-ok { color: var(--green); }
+    .log-err { color: var(--red); }
+    .log-info { color: var(--text-dim); }
+
+    /* ALERTS */
+    .alert {
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .alert-warn { background: var(--yellow-dim); border: 1px solid #FFC00033; color: var(--yellow); }
+    .alert-ok { background: var(--green-dim); border: 1px solid #00C48C33; color: var(--green); }
+    .alert-err { background: var(--red-dim); border: 1px solid #FF4D4D33; color: var(--red); }
+
+    .hidden { display: none !important; }
+    .spinner { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-badge">📋</div>
+    <div>
+      <h1>Importação em Massa</h1>
+      <p>Importe squads e plantonistas via JSON ou CSV</p>
+    </div>
+    <a href="/" class="back-btn">← Voltar ao sistema</a>
+  </header>
+
+  <!-- CREDENCIAIS -->
+  <div class="card">
+    <div class="card-title">Credenciais Firebase</div>
+    <div class="fields-row">
+      <div>
+        <label>API Key</label>
+        <input type="password" id="apiKey" placeholder="AIzaSy..." autocomplete="off"/>
+      </div>
+      <div>
+        <label>Project ID</label>
+        <input type="text" id="projectId" placeholder="app-escala-plantao"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('json')">📦 JSON (arquivos do sistema)</button>
+    <button class="tab" onclick="setTab('csv')">📊 CSV (exportado do Sheets)</button>
+  </div>
+
+  <!-- JSON TAB -->
+  <div id="tab-json">
+    <div class="card">
+      <div class="card-title">Upload de arquivo JSON</div>
+      <div class="alert alert-warn">
+        <span>⚠️</span>
+        <span>O JSON deve ter o formato <code style="font-family:var(--mono)">{squads:[...], oncalls:[...]}</code> — igual aos arquivos do ZIP do projeto.</span>
+      </div>
+      <div class="dropzone" id="drop-json" ondragover="dragOver(event,'drop-json')" ondragleave="dragLeave('drop-json')" ondrop="dropFile(event,'json')">
+        <input type="file" accept=".json" onchange="loadFile(this,'json')"/>
+        <div class="dropzone-icon">📂</div>
+        <h3>Solte o arquivo JSON aqui</h3>
+        <p>ou clique para selecionar</p>
+        <div id="json-filename" class="hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSV TAB -->
+  <div id="tab-csv" class="hidden">
+    <div class="card">
+      <div class="card-title">Upload de arquivo CSV</div>
+      <div class="alert alert-warn">
+        <span>⚠️</span>
+        <span>O CSV precisa ter as colunas abaixo. Exporte sua aba do Google Sheets como CSV e faça o upload.</span>
+      </div>
+      <div class="dropzone" id="drop-csv" ondragover="dragOver(event,'drop-csv')" ondragleave="dragLeave('drop-csv')" ondrop="dropFile(event,'csv')">
+        <input type="file" accept=".csv" onchange="loadFile(this,'csv')"/>
+        <div class="dropzone-icon">📊</div>
+        <h3>Solte o arquivo CSV aqui</h3>
+        <p>ou clique para selecionar</p>
+        <div id="csv-filename" class="hidden"></div>
+      </div>
+      <div class="csv-template">
+        <p>📋 Formato esperado das colunas (linha 1 = cabeçalho):</p>
+        <code>Squad,Nome,Telefone,Cargo,Subgrupo,Observacao,Ordem</code>
+        <code style="color:var(--text-dim)">BAAP,João Silva,(11) 99999-9999,Plantão,@time-alpha,,1</code>
+        <code style="color:var(--text-dim)">BAAP,Maria Lima,(11) 88888-8888,Líder,,,99</code>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div class="preview-section hidden" id="preview-section">
+    <div class="preview-header">
+      <h2>📋 Prévia dos dados</h2>
+      <span class="count-badge" id="count-badge">0 plantonistas</span>
+    </div>
+    <div id="preview-content"></div>
+
+    <div class="import-bar">
+      <button class="btn-import" id="btn-import" onclick="importar()">
+        🚀 Importar tudo para o Firebase
+      </button>
+      <div class="progress-wrap hidden" id="progress-wrap">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <div class="log-area hidden" id="log-area"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Estado global ──
+  let dadosParaImportar = []; // [{squadName, plantonistas:[]}]
+  let tabAtual = 'json';
+
+  // ── Tabs ──
+  function setTab(tab) {
+    tabAtual = tab;
+    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'json') || (i === 1 && tab === 'csv')));
+    document.getElementById('tab-json').classList.toggle('hidden', tab !== 'json');
+    document.getElementById('tab-csv').classList.toggle('hidden', tab !== 'csv');
+    limparPreview();
+  }
+
+  // ── Drag & Drop ──
+  function dragOver(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag'); }
+  function dragLeave(id) { document.getElementById(id).classList.remove('drag'); }
+  function dropFile(e, tipo) {
+    e.preventDefault();
+    dragLeave('drop-' + tipo);
+    const file = e.dataTransfer.files[0];
+    if (file) processarArquivo(file, tipo);
+  }
+  function loadFile(input, tipo) {
+    if (input.files[0]) processarArquivo(input.files[0], tipo);
+  }
+
+  // ── Leitura do arquivo ──
+  function processarArquivo(file, tipo) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        if (tipo === 'json') processarJson(e.target.result, file.name);
+        else processarCsv(e.target.result, file.name);
+      } catch (err) {
+        mostrarAlerta('err', '❌ Erro ao ler arquivo: ' + err.message);
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  function processarJson(texto, nome) {
+    const data = JSON.parse(texto);
+
+    // Suporta formato: {squads:[...], oncalls:[...]}
+    if (data.squads && data.oncalls) {
+      const mapa = {};
+      data.squads.forEach(s => { mapa[s.id] = { squadName: s.name, plantonistas: [] }; });
+      data.oncalls.forEach(o => {
+        if (mapa[o.squadId]) {
+          mapa[o.squadId].plantonistas.push(normalizarPlantonista(o));
+        }
+      });
+      dadosParaImportar = Object.values(mapa).filter(b => b.plantonistas.length > 0);
+    }
+    // Suporte a array direto de squads com plantonistas embutidos
+    else if (Array.isArray(data)) {
+      dadosParaImportar = data.map(s => ({
+        squadName: s.name || s.squadName,
+        plantonistas: (s.oncalls || s.plantonistas || []).map(normalizarPlantonista)
+      })).filter(b => b.plantonistas.length > 0);
+    } else {
+      throw new Error('Formato JSON não reconhecido.');
+    }
+
+    mostrarFilename('json', nome);
+    renderPreview();
+  }
+
+  function processarCsv(texto, nome) {
+    const linhas = texto.split('\n').map(l => l.trim()).filter(Boolean);
+    if (linhas.length < 2) throw new Error('CSV vazio ou sem dados.');
+
+    const cabecalho = linhas[0].split(',').map(c => c.trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
+    const iSquad = encontrar(cabecalho, ['squad', 'squad name', 'nome da squad']);
+    const iNome = encontrar(cabecalho, ['nome', 'name', 'plantonista']);
+    const iTel = encontrar(cabecalho, ['telefone', 'fone', 'celular', 'phone', 'tel']);
+    const iCargo = encontrar(cabecalho, ['cargo', 'hours', 'papel', 'tipo']);
+    const iSub = encontrar(cabecalho, ['subgrupo', 'subgroup', 'grupo']);
+    const iObs = encontrar(cabecalho, ['observacao', 'observation', 'obs']);
+    const iOrdem = encontrar(cabecalho, ['ordem', 'order', 'orderindex']);
+
+    if (iSquad === -1) throw new Error('Coluna "Squad" não encontrada no CSV.');
+    if (iNome === -1) throw new Error('Coluna "Nome" não encontrada no CSV.');
+
+    const mapa = {};
+    linhas.slice(1).forEach((linha, idx) => {
+      const cols = parseCsvLinha(linha);
+      const squad = cols[iSquad]?.trim();
+      const nome = cols[iNome]?.trim();
+      if (!squad || !nome) return;
+
+      if (!mapa[squad]) mapa[squad] = { squadName: squad, plantonistas: [] };
+      const cargo = cols[iCargo]?.trim() || 'Plantão';
+      const isLead = /l[ií]der|lead|tl\b/i.test(cargo);
+      const ordem = iOrdem !== -1 && cols[iOrdem] ? parseInt(cols[iOrdem]) : (idx + 1);
+
+      mapa[squad].plantonistas.push({
+        personName: nome,
+        phone: cols[iTel]?.trim() || '',
+        hours: cargo,
+        subgroup: cols[iSub]?.trim() || '',
+        observation: cols[iObs]?.trim() || '',
+        isLead,
+        hasPhone: !!(cols[iTel]?.trim()),
+        orderIndex: isLead ? 99 : ordem
+      });
+    });
+
+    dadosParaImportar = Object.values(mapa).filter(b => b.plantonistas.length > 0);
+    mostrarFilename('csv', nome);
+    renderPreview();
+  }
+
+  // ── Normalização ──
+  function normalizarPlantonista(o) {
+    const cargo = o.hours || o.cargo || o.papel || 'Plantão';
+    const isLead = o.isLead !== undefined ? o.isLead : /l[ií]der|lead/i.test(cargo);
+    return {
+      personName: o.personName || o.nome || '',
+      phone: o.phone || o.telefone || o.fone || '',
+      hours: cargo,
+      subgroup: o.subgroup || o.subgrupo || '',
+      observation: o.observation || o.observacao || '',
+      isLead,
+      hasPhone: !!(o.phone || o.telefone || o.fone || ''),
+      orderIndex: o.orderIndex ?? (isLead ? 99 : 1)
+    };
+  }
+
+  function encontrar(arr, opcoes) {
+    return arr.findIndex(c => opcoes.some(o => c.includes(o)));
+  }
+
+  function parseCsvLinha(linha) {
+    const cols = [];
+    let cur = '', inQuote = false;
+    for (const ch of linha) {
+      if (ch === '"') { inQuote = !inQuote; }
+      else if (ch === ',' && !inQuote) { cols.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  // ── Preview ──
+  function renderPreview() {
+    const section = document.getElementById('preview-section');
+    const content = document.getElementById('preview-content');
+    const badge = document.getElementById('count-badge');
+
+    const total = dadosParaImportar.reduce((s, b) => s + b.plantonistas.length, 0);
+    badge.textContent = `${total} plantonistas em ${dadosParaImportar.length} squads`;
+    section.classList.remove('hidden');
+
+    content.innerHTML = dadosParaImportar.map(bloco => `
+      <div class="squad-block">
+        <div class="squad-name">
+          <span>🏷 ${escHtml(bloco.squadName)}</span>
+          <span style="color:var(--text-dim);font-size:11px">${bloco.plantonistas.length} pessoas</span>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th><th>Telefone</th><th>Cargo</th><th>Subgrupo</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${bloco.plantonistas.map(p => `
+                <tr>
+                  <td>${escHtml(p.personName)}</td>
+                  <td style="font-family:var(--mono);font-size:12px">${escHtml(p.phone) || '<span style="color:var(--text-dim)">—</span>'}</td>
+                  <td><span class="tag ${p.isLead ? 'tag-lead' : 'tag-plantao'}">${escHtml(p.hours)}</span></td>
+                  <td style="color:var(--text-dim);font-size:12px">${escHtml(p.subgroup) || '—'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function limparPreview() {
+    dadosParaImportar = [];
+    document.getElementById('preview-section').classList.add('hidden');
+    document.getElementById('log-area').classList.add('hidden');
+    document.getElementById('progress-wrap').classList.add('hidden');
+  }
+
+  function mostrarFilename(tipo, nome) {
+    const el = document.getElementById(tipo + '-filename');
+    el.innerHTML = `<div class="file-badge">📄 ${escHtml(nome)}</div>`;
+    el.classList.remove('hidden');
+  }
+
+  // ── Importação ──
+  async function importar() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const projectId = document.getElementById('projectId').value.trim();
+
+    if (!apiKey || !projectId) return alert('Preencha as credenciais do Firebase!');
+    if (dadosParaImportar.length === 0) return alert('Nenhum dado para importar!');
+
+    const btn = document.getElementById('btn-import');
+    const progressWrap = document.getElementById('progress-wrap');
+    const progressBar = document.getElementById('progress-bar');
+    const logArea = document.getElementById('log-area');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner">⟳</span> Importando...';
+    progressWrap.classList.remove('hidden');
+    logArea.classList.remove('hidden');
+    logArea.innerHTML = '';
+
+    const total = dadosParaImportar.length;
+    let ok = 0, erros = 0;
+
+    for (let i = 0; i < dadosParaImportar.length; i++) {
+      const bloco = dadosParaImportar[i];
+      log('info', `[${i+1}/${total}] Processando squad: ${bloco.squadName}...`);
+
+      try {
+        // 1. Busca ou cria a squad
+        const squadId = await buscarOuCriarSquad(bloco.squadName, projectId, apiKey);
+
+        // 2. Deleta plantonistas antigos
+        await deletarPlantonistasSquad(squadId, projectId, apiKey);
+
+        // 3. Cria plantonistas novos
+        for (const p of bloco.plantonistas) {
+          await criarPlantonista({ ...p, squadId }, projectId, apiKey);
+        }
+
+        log('ok', `✅ ${bloco.squadName}: ${bloco.plantonistas.length} plantonistas importados`);
+        ok++;
+      } catch (err) {
+        log('err', `❌ ${bloco.squadName}: ${err.message}`);
+        erros++;
+      }
+
+      progressBar.style.width = `${((i + 1) / total) * 100}%`;
+    }
+
+    btn.disabled = false;
+    if (erros === 0) {
+      btn.innerHTML = `✅ Importação concluída! ${ok} squads importadas`;
+      btn.style.background = 'var(--green)';
+    } else {
+      btn.innerHTML = `⚠️ ${ok} squads ok, ${erros} com erro`;
+      btn.style.background = 'var(--yellow)';
+      btn.style.color = '#000';
+    }
+  }
+
+  // ── Firebase REST ──
+  const BASE = (projectId) =>
+    `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents`;
+
+  async function buscarOuCriarSquad(nome, projectId, apiKey) {
+    const resp = await fetch(`${BASE(projectId)}:runQuery?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'squads' }],
+          where: { fieldFilter: { field: { fieldPath: 'name' }, op: 'EQUAL', value: { stringValue: nome } } },
+          limit: 1
+        }
+      })
+    });
+    const resultado = await resp.json();
+    if (resultado[0]?.document?.name) {
+      return resultado[0].document.name.split('/').pop();
+    }
+    // Cria
+    const criar = await fetch(`${BASE(projectId)}/squads?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: { name: { stringValue: nome } } })
+    });
+    const criado = await criar.json();
+    if (!criado.name) throw new Error('Falha ao criar squad no Firebase. Verifique a apiKey e projectId.');
+    return criado.name.split('/').pop();
+  }
+
+  async function deletarPlantonistasSquad(squadId, projectId, apiKey) {
+    const resp = await fetch(`${BASE(projectId)}:runQuery?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: 'oncalls' }],
+          where: { fieldFilter: { field: { fieldPath: 'squadId' }, op: 'EQUAL', value: { stringValue: squadId } } }
+        }
+      })
+    });
+    const docs = await resp.json();
+    await Promise.all(docs.filter(d => d.document).map(d =>
+      fetch(`${d.document.name}?key=${apiKey}`, { method: 'DELETE' })
+    ));
+  }
+
+  async function criarPlantonista(p, projectId, apiKey) {
+    await fetch(`${BASE(projectId)}/oncalls?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fields: {
+          squadId:     { stringValue: p.squadId || '' },
+          personName:  { stringValue: p.personName || '' },
+          phone:       { stringValue: p.phone || '' },
+          hours:       { stringValue: p.hours || 'Plantão' },
+          subgroup:    { stringValue: p.subgroup || '' },
+          observation: { stringValue: p.observation || '' },
+          isLead:      { booleanValue: !!p.isLead },
+          hasPhone:    { booleanValue: !!p.hasPhone },
+          orderIndex:  { integerValue: p.orderIndex || 1 }
+        }
+      })
+    });
+  }
+
+  // ── Utils ──
+  function log(tipo, msg) {
+    const el = document.getElementById('log-area');
+    el.innerHTML += `<div class="log-${tipo}">${escHtml(msg)}</div>`;
+    el.scrollTop = el.scrollHeight;
+  }
+  function mostrarAlerta(tipo, msg) {
+    const el = document.getElementById('preview-section');
+    el.classList.remove('hidden');
+    el.innerHTML = `<div class="alert alert-${tipo}"><span>${msg}</span></div>`;
+  }
+  function escHtml(str) {
+    return (str || '').toString()
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

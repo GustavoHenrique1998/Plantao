@@ -1,0 +1,1025 @@
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contatos Gerais Magalu</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.7/firebase-analytics-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Space Grotesk', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: { 50: '#f0f4ff', 100: '#e1e9ff', 200: '#c3d3ff', 500: '#0052FF', 600: '#0041CC', 900: '#001A66' },
+            slate: { 950: '#0b0f19' }
+          },
+          boxShadow: {
+            'premium': '0 4px 30px rgba(0, 82, 255, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02)',
+            'premium-hover': '0 20px 40px rgba(0, 82, 255, 0.08), 0 1px 8px rgba(0, 82, 255, 0.04)',
+            'glass-shadow': '0 8px 32px 0 rgba(0, 82, 255, 0.04)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+    body { background-color: #fafbfc; color: #0f172a; overflow-y: scroll; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; border: 2px solid #f1f5f9; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(20px) saturate(190%);
+      -webkit-backdrop-filter: blur(20px) saturate(190%);
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .transition-premium { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .page-enter { animation: pageReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes pageReveal { 0% { opacity: 0; transform: translateY(8px) scale(0.99); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .shimmer {
+      background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+      background-size: 200% 100%;
+      animation: loading-shimmer 1.6s infinite linear;
+    }
+    @keyframes loading-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .pulse-dot { position: relative; }
+    .pulse-dot::after {
+      content: ''; position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: inherit; border-radius: 50%;
+      animation: pulse-glow 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+    }
+    @keyframes pulse-glow { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(2.8); opacity: 0; } }
+  </style>
+</head>
+
+<body class="antialiased">
+  <div id="app"></div>
+
+<script type="text/plain" id="app-script">
+    const { useEffect, useMemo, useState, useRef } = React;
+
+    function padStoreNumber(value) {
+      const raw = String(value == null ? "" : value);
+      if (raw.length >= 4) return raw;
+      return new Array(4 - raw.length + 1).join('0') + raw;
+    }
+
+    function Icon({ path, className = "w-5 h-5", strokeWidth = 1.8 }) {
+      return (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={strokeWidth} stroke="currentColor" className={className}><path strokeLinecap="round" strokeLinejoin="round" d={path} /></svg>);
+    }
+
+    const ICONS = {
+      Plus: (p) => <Icon path="M12 4.5v15m7.5-7.5h-15" {...p} />,
+      ArrowRight: (p) => <Icon path="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" {...p} />,
+      Pencil: (p) => <Icon path="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" {...p} />,
+      Trash: (p) => <Icon path="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" {...p} />,
+      ArrowLeft: (p) => <Icon path="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" {...p} />,
+      UserPlus: (p) => <Icon path="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A1.33 1.33 0 0115.3 21H8.7a1.33 1.33 0 01-1.4-1.765z" {...p} />,
+      Phone: (p) => <Icon path="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.213-.992-.55-1.33l-2.96-2.96c-.337-.337-.834-.43-1.258-.235l-2.028.761a1.125 1.125 0 01-1.343-.464l-3.21-5.562a1.125 1.125 0 01.192-1.296l1.6-1.6c.337-.337.43-.834.235-1.258l-.76-2.028C8.732 2.463 8.256 2.25 7.74 2.25H6.368c-1.24 0-2.25.986-2.25 2.193v.357z" {...p} />,
+      ArrowUp: (p) => <Icon path="M12 19.5v-15m0 0l-6.75 6.75M12 4.5l6.75 6.75" {...p} />,
+      ArrowDown: (p) => <Icon path="M12 4.5v15m0 0l6.75-6.75M12 19.5l-6.75-6.75" {...p} />,
+      ArrowUpTray: (p) => <Icon path="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" {...p} />,
+      ArrowDownTray: (p) => <Icon path="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" {...p} />,
+      CheckCircle: (p) => <Icon path="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" {...p} />,
+      User: (p) => <Icon path="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A1.875 1.875 0 0118 22.5H6a1.875 1.875 0 01-1.499-2.382z" {...p} />,
+      Star: (p) => <Icon path="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.31h5.513c.498 0 .704.657.337.986l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-3.356a.563.563 0 00-.586 0L6.982 21.07a.562.562 0 01-.84-.61l1.285-5.386a.563.563 0 00-.182-.557l-4.204-3.602a.563.563 0 01.337-.986H9.88a.563.563 0 00.475-.31l2.125-5.11z" {...p} />,
+      Clock: (p) => <Icon path="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" {...p} />,
+      MagnifyingGlass: (p) => <Icon path="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z" {...p} />,
+      Squares: (p) => <Icon path="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" {...p} />,
+      ChevronRight: (p) => <Icon path="M8.25 4.5l7.5 7.5-7.5 7.5" {...p} />,
+      DragHandle: (p) => <Icon path="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" {...p} />,
+      DocumentArrowUp: (p) => <Icon path="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" {...p} />,
+      Building: (p) => <Icon path="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.33L12 4.5 4.5 10.33V21M12 13.5h.008v.008H12v-.008z" {...p} />,
+      Truck: (p) => <Icon path="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.129-1.125v-3.375c0-.53-.368-1.028-.952-1.13l-3.333-.556m-2.222-1.25H4.5M18 10.5h-2.25v3.375M12 13.5H4.5" {...p} />,
+      MapPin: (p) => <Icon path="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" {...p} />,
+      DocumentText: (p) => <Icon path="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" {...p} />,
+      Eye: (p) => <Icon path="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z M15 12a3 3 0 11-6 0 3 3 0 016 0z" {...p} />
+    };
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBF-KrK6o4C9MVIJkujMDqyiLmV_T9lR1c",
+      authDomain: "plantaomagalu.firebaseapp.com",
+      projectId: "plantaomagalu",
+      storageBucket: "plantaomagalu.firebasestorage.app",
+      messagingSenderId: "190895198921",
+      appId: "1:190895198921:web:efa676cd5dde22151ef318",
+      measurementId: "G-31FZD3JNY4"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    const provider = new firebase.auth.GoogleAuthProvider();
+
+    async function logAction(action, target, details = "") {
+      try {
+        await db.collection('logs').add({
+          action, target, details,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          user: auth.currentUser?.displayName || "Sistema Anônimo"
+        });
+      } catch (e) { }
+    }
+
+    function formatPhone(v) {
+      const nums = String(v || "").replace(/\D/g, "").slice(0, 11);
+      if (nums.length <= 2) return `(${nums}`;
+      if (nums.length <= 6) return `(${nums.slice(0,2)}) ${nums.slice(2)}`;
+      if (nums.length <= 10) return `(${nums.slice(0,2)}) ${nums.slice(2,6)}-${nums.slice(6)}`;
+      return `(${nums.slice(0,2)}) ${nums.slice(2,7)}-${nums.slice(7)}`;
+    }
+
+    function Toast({ message, type = "success", onClose }) {
+      useEffect(() => { const id = setTimeout(onClose, 2500); return () => clearTimeout(id); }, [onClose]);
+      const isSuccess = type === "success";
+      return (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] pointer-events-none page-enter">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-white text-sm font-semibold shadow-2xl transition-all duration-300 ${isSuccess ? 'bg-slate-900 border border-slate-800' : 'bg-red-600'}`}>
+            {isSuccess ? <ICONS.CheckCircle className="w-5 h-5 text-emerald-400" /> : <span>⚠️</span>}
+            <span className="tracking-wide">{message}</span>
+          </div>
+        </div>
+      );
+    }
+
+    function CardSkeleton() {
+      return (
+        <div className="bg-white border border-slate-200/60 rounded-2xl p-5 space-y-4 shadow-premium">
+          <div className="flex items-center gap-3"><div className="shimmer w-9 h-9 rounded-xl" /><div className="space-y-2 flex-1"><div className="shimmer h-4 rounded w-2/3" /><div className="shimmer h-3 rounded w-1/3" /></div></div>
+          <div className="space-y-2 pt-2"><div className="shimmer h-3 rounded w-full" /><div className="shimmer h-3 rounded w-4/5" /></div>
+        </div>
+      );
+    }
+
+    function Modal({ title, children, onClose }) {
+      useEffect(() => {
+        const onKey = (e) => e.key === "Escape" && onClose();
+        window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
+      }, [onClose]);
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300" onClick={onClose} />
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-lg relative z-10 page-enter max-h-[95vh] flex flex-col overflow-hidden">
+            <div className="flex-shrink-0 flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/50">
+              <h3 className="font-display font-bold text-lg text-slate-900 tracking-tight">{title}</h3>
+              <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-700 bg-white rounded-full shadow-sm border border-slate-200 hover:bg-slate-100 transition-all flex items-center justify-center">✕</button>
+            </div>
+            <div className="p-5 sm:p-6 overflow-y-auto">{children}</div>
+          </div>
+        </div>
+      );
+    }
+
+    function OnCallForm({ defaultValues, submitLabel = "Confirmar", onSubmit }) {
+      const [form, setForm] = useState({ personName: "", phone: "", hours: "", observation: "", subgroup: "", isLead: false, hasPhone: true, orderIndex: 99, isOff: false, ...defaultValues });
+      const handleCheck = (key) => setForm(p => ({ ...p, [key]: !p[key] }));
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(form.personName.trim()) onSubmit(form); }}>
+          <div className="grid grid-cols-12 gap-3"><div className="col-span-8 sm:col-span-9"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome do Integrante</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all" value={form.personName} onChange={e => setForm(p=>({...p, personName: e.target.value}))} required autoFocus /></div><div className="col-span-4 sm:col-span-3"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Ordem</label><input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all text-center" value={form.orderIndex} onChange={e => setForm(p=>({...p, orderIndex: parseInt(e.target.value) || 1}))} min="1" /></div></div>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Especialidade / Cargo</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all" value={form.subgroup} onChange={e => setForm(p=>({...p, subgroup: e.target.value}))} /></div>
+          <div className="grid grid-cols-2 gap-3"><div onClick={() => handleCheck('hasPhone')} className={`cursor-pointer border-2 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-all ${form.hasPhone ? 'border-brand-500 bg-brand-50/50 shadow-sm' : 'border-slate-100 bg-slate-50 hover:bg-slate-100'}`}><ICONS.Phone className={`w-4 h-4 mb-1 ${form.hasPhone ? 'text-brand-500' : 'text-slate-400'}`} /><span className={`text-[11px] font-bold ${form.hasPhone ? 'text-brand-700' : 'text-slate-500'}`}>Possui Telefone</span></div><div onClick={() => handleCheck('isLead')} className={`cursor-pointer border-2 rounded-xl p-2.5 flex flex-col items-center justify-center text-center transition-all ${form.isLead ? 'border-amber-500 bg-amber-50/50 shadow-sm' : 'border-slate-100 bg-slate-50 hover:bg-slate-100'}`}><ICONS.Star className={`w-4 h-4 mb-1 ${form.isLead ? 'text-amber-500' : 'text-slate-400'}`} /><span className={`text-[11px] font-bold ${form.isLead ? 'text-amber-700' : 'text-slate-500'}`}>Líder (Nível 2)</span></div></div>
+          <div className={`grid gap-3 ${form.hasPhone ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>{form.hasPhone && (<div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Contato Telefônico</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all" value={form.phone} onChange={e => setForm(p=>({...p, phone: formatPhone(String(e.target.value))}))} required={form.hasPhone} /></div>)}<div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Janela de Horário</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all" value={form.hours} onChange={e => setForm(p=>({...p, hours: e.target.value}))} /></div></div>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Observações Adicionais</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all resize-none" rows="2" value={form.observation} onChange={e => setForm(p=>({...p, observation: e.target.value}))} /></div>
+          <div className="pt-4 mt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3"><label className="flex items-center justify-center sm:justify-start gap-2 cursor-pointer group p-1.5 sm:-ml-1.5 rounded-lg hover:bg-red-50 transition-colors"><div className={`w-4 h-4 rounded flex items-center justify-center border ${form.isOff ? 'bg-red-500 border-red-500' : 'border-slate-300 bg-white'}`}>{form.isOff && <ICONS.CheckCircle className="w-3 h-3 text-white" />}</div><span className={`text-sm font-bold ${form.isOff ? 'text-red-600' : 'text-slate-500 group-hover:text-red-500'}`}>Férias / Indisponível</span></label><button type="submit" className="w-full sm:w-auto bg-slate-900 hover:bg-brand-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+    function SquadForm({ defaultValues = { name: "" }, submitLabel = "Salvar Squad", onSubmit }) {
+      const [name, setName] = useState(defaultValues.name);
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(name.trim()) onSubmit({ name: name.trim() }); }}>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Identificação da Squad</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 focus:bg-white transition-all" value={name} onChange={e => setName(e.target.value)} required autoFocus /></div>
+          <div className="pt-3 border-t border-slate-100 flex justify-end"><button type="submit" className="w-full sm:w-auto bg-slate-900 hover:bg-brand-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+    function CdForm({ defaultValues = { name: "" }, submitLabel = "Salvar CD", onSubmit }) {
+      const [name, setName] = useState(defaultValues.name);
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(name.trim()) onSubmit({ name: name.trim() }); }}>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome do Centro de Distribuição</label><input className="w-full bg-amber-50/30 border border-amber-200/60 rounded-xl px-3 py-2.5 text-base font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all" value={name} onChange={e => setName(e.target.value)} required autoFocus /></div>
+          <div className="pt-3 border-t border-slate-100 flex justify-end"><button type="submit" className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+    function CdContactForm({ defaultValues, submitLabel = "Confirmar Contato", onSubmit }) {
+      const [form, setForm] = useState({ personName: "", phone: "", role: "", observation: "", orderIndex: 99, ...defaultValues });
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(form.personName.trim()) onSubmit(form); }}>
+          <div className="grid grid-cols-12 gap-3"><div className="col-span-8 sm:col-span-9"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome / Setor</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all" value={form.personName} onChange={e => setForm(p=>({...p, personName: e.target.value}))} required autoFocus /></div><div className="col-span-4 sm:col-span-3"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Ordem</label><input type="number" className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all text-center" value={form.orderIndex} onChange={e => setForm(p=>({...p, orderIndex: parseInt(e.target.value) || 1}))} min="1" /></div></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Cargo / Função</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all" value={form.role} onChange={e => setForm(p=>({...p, role: e.target.value}))} required /></div><div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Telefone / Ramal</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all" value={form.phone} onChange={e => setForm(p=>({...p, phone: formatPhone(String(e.target.value))}))} required /></div></div>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 focus:bg-white transition-all resize-none" rows="2" value={form.observation} onChange={e => setForm(p=>({...p, observation: e.target.value}))} /></div>
+          <div className="pt-4 mt-4 border-t flex justify-end"><button type="submit" className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+
+    function FilialForm({ defaultValues, submitLabel = "Salvar Filial", onSubmit }) {
+      const [form, setForm] = useState({
+        storeNumber: "", name: "", regional: "", managerName: "", phone: "",
+        address: "", addressNumber: "", neighborhood: "", cep: "", city: "", state: "",
+        hours: "", openSunday: "", ...defaultValues
+      });
+      const isEditing = !!defaultValues?.storeNumber;
+
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(form.storeNumber) onSubmit(form); }}>
+          <div className="grid grid-cols-12 gap-3">
+            <div className="col-span-4 sm:col-span-3">
+              <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Número</label>
+              <input type="number" disabled={isEditing} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all disabled:opacity-50" value={form.storeNumber} onChange={e => setForm(p=>({...p, storeNumber: e.target.value}))} required autoFocus={!isEditing} />
+            </div>
+            <div className="col-span-8 sm:col-span-9">
+              <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome da Filial</label>
+              <input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.name} onChange={e => setForm(p=>({...p, name: e.target.value}))} required autoFocus={isEditing} />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Regional</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.regional} onChange={e => setForm(p=>({...p, regional: e.target.value}))} /></div>
+            <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome da Gerência</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.managerName} onChange={e => setForm(p=>({...p, managerName: e.target.value}))} /></div>
+          </div>
+          <div className="grid grid-cols-12 gap-3">
+             <div className="col-span-8"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Endereço</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.address} onChange={e => setForm(p=>({...p, address: e.target.value}))} /></div>
+             <div className="col-span-4"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Número (End)</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.addressNumber} onChange={e => setForm(p=>({...p, addressNumber: e.target.value}))} /></div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+             <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Cidade</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.city} onChange={e => setForm(p=>({...p, city: e.target.value}))} /></div>
+             <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Estado</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.state} onChange={e => setForm(p=>({...p, state: e.target.value}))} /></div>
+             <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">CEP</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.cep} onChange={e => setForm(p=>({...p, cep: e.target.value}))} /></div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2"><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Telefone Principal</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.phone} onChange={e => setForm(p=>({...p, phone: formatPhone(String(e.target.value))}))} /></div>
+            <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Abre aos Domingos?</label><select className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.openSunday} onChange={e => setForm(p=>({...p, openSunday: e.target.value}))}><option value="">Selecionar</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+          </div>
+          <div className="pt-4 mt-4 border-t border-slate-100 flex justify-end"><button type="submit" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+
+    function FilialContactForm({ defaultValues, submitLabel = "Confirmar Ramal", onSubmit }) {
+      const [form, setForm] = useState({ personName: "", phone: "", role: "", observation: "", ...defaultValues });
+      return (
+        <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); if(form.personName.trim()) onSubmit(form); }}>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Nome / Setor</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.personName} onChange={e => setForm(p=>({...p, personName: e.target.value}))} placeholder="Ex: Recebimento, Ramal Subgerente..." required autoFocus /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3"><div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Cargo / Função</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.role} onChange={e => setForm(p=>({...p, role: e.target.value}))} required /></div><div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Telefone / Ramal</label><input className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all" value={form.phone} onChange={e => setForm(p=>({...p, phone: formatPhone(String(e.target.value))}))} required /></div></div>
+          <div><label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider mb-1">Observações</label><textarea className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 focus:bg-white transition-all resize-none" rows="2" value={form.observation} onChange={e => setForm(p=>({...p, observation: e.target.value}))} /></div>
+          <div className="pt-4 mt-4 border-t border-slate-100 flex justify-end"><button type="submit" className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm px-6 py-2.5 rounded-xl shadow-md transform active:scale-[0.98] transition-all flex items-center justify-center gap-2"><ICONS.CheckCircle className="w-4 h-4" /> {submitLabel}</button></div>
+        </form>
+      );
+    }
+
+    function ImportModal({ onClose, onImport }) {
+      const fileInputRef = useRef(null);
+      const handleFileChange = (e) => { const file = e.target.files[0]; if (file) { onImport(file); onClose(); } };
+      return (
+        <Modal title="Restaurar Backup Global" onClose={onClose}>
+          <div className="space-y-4">
+            <p className="text-sm font-medium text-slate-500 leading-relaxed bg-slate-50 p-3.5 rounded-xl border border-slate-100">Selecione o arquivo <strong className="text-slate-700">.json</strong> gerado anteriormente para restaurar a base.</p>
+            <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center bg-slate-50 hover:bg-brand-50 hover:border-brand-400 transition-all cursor-pointer group">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm border border-slate-200 mx-auto mb-3 group-hover:scale-110 transition-all"><ICONS.DocumentArrowUp className="w-6 h-6 text-brand-500" /></div>
+              <p className="text-sm font-bold text-slate-700 group-hover:text-brand-600 transition-colors">Buscar arquivo JSON</p>
+              <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleFileChange} />
+            </div>
+          </div>
+        </Modal>
+      );
+    }
+
+    function OnCallCard({ oncall, onEdit, onDelete, isLead, setToast, admin }) {
+      const safePhone = String(oncall.phone || "").replace(/\D/g, "");
+      return (
+        <div className={`transition-premium bg-white border rounded-2xl p-5 flex flex-col justify-between relative shadow-premium group ${oncall.isOff ? 'opacity-50' : ''} ${isLead ? 'border-amber-200 bg-amber-50/10' : 'border-slate-200/70'}`}>
+          <div>
+            <div className="flex items-center gap-3"><span className={`w-8 h-8 rounded-xl font-display font-bold text-xs flex items-center justify-center ${oncall.isOff ? 'bg-slate-100 text-slate-400' : isLead ? 'bg-amber-100 text-amber-700' : 'bg-brand-50 text-brand-500'}`}>{parseInt(oncall.orderIndex) > 90 ? "!" : `#${parseInt(oncall.orderIndex) || '?'}`}</span><div><h4 className="font-semibold text-slate-900 tracking-tight">{oncall.personName || "Sem Nome"}</h4><div className="flex items-center gap-1.5 mt-1 flex-wrap">{oncall.subgroup && <span className="inline-flex text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">{oncall.subgroup}</span>}{isLead && <span className="inline-flex text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-700">Líder</span>}</div></div></div>
+            <div className="mt-4 space-y-2.5 text-xs text-slate-500 border-t border-slate-50 pt-3">{oncall.hours && <div className="flex items-center gap-2"><ICONS.Clock className="w-4 h-4 text-slate-400" /> <span className="font-medium">{oncall.hours}</span></div>}{oncall.hasPhone !== false && oncall.phone && <div className="flex items-center gap-2 flex-wrap"><ICONS.Phone className="w-4 h-4 text-slate-400" /> <span className="font-semibold text-slate-700">{formatPhone(String(oncall.phone))}</span> <a href={`tel:${safePhone}`} className="ml-auto px-2 py-1 text-[11px] font-medium bg-slate-50 border border-slate-200 rounded-md hover:bg-brand-50 hover:text-brand-500 transition-all">Ligar</a></div>}</div>
+          </div>
+          {admin && <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end gap-2"><button onClick={() => onEdit(oncall)} className="p-1.5 text-slate-400 hover:text-brand-500"><ICONS.Pencil className="w-4 h-4" /></button><button onClick={() => onDelete(oncall.id)} className="p-1.5 text-slate-400 hover:text-red-500"><ICONS.Trash className="w-4 h-4" /></button></div>}
+        </div>
+      );
+    }
+    function CdContactCard({ contact, onEdit, onDelete, setToast, admin }) {
+      const safePhone = String(contact.phone || "").replace(/\D/g, "");
+      return (
+        <div className="transition-premium bg-white border border-slate-200/70 rounded-2xl p-5 flex flex-col justify-between relative shadow-premium group">
+          <div>
+            <div className="flex items-center gap-3"><span className="w-8 h-8 rounded-xl font-display font-bold text-xs flex items-center justify-center bg-amber-50 text-amber-600 border border-amber-100/50">{parseInt(contact.orderIndex) > 90 ? "-" : `#${parseInt(contact.orderIndex) || '?'}`}</span><div><h4 className="font-semibold text-slate-900 tracking-tight">{contact.personName || "Sem Nome"}</h4><div className="flex items-center gap-1.5 mt-1 flex-wrap">{contact.role && <span className="inline-flex text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">{contact.role}</span>}</div></div></div>
+            <div className="mt-4 space-y-2.5 text-xs text-slate-500 border-t border-slate-50 pt-3">{contact.phone && <div className="flex items-center gap-2 flex-wrap"><ICONS.Phone className="w-4 h-4 text-slate-400" /> <span className="font-semibold text-slate-700">{formatPhone(String(contact.phone))}</span> <a href={`tel:${safePhone}`} className="ml-auto px-2 py-1 text-[11px] font-medium bg-slate-50 border border-slate-200 rounded-md hover:bg-amber-50 hover:text-amber-600 transition-all">Ligar</a></div>}</div>
+          </div>
+          {admin && <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end gap-2"><button onClick={() => onEdit(contact)} className="p-1.5 text-slate-400 hover:text-amber-600"><ICONS.Pencil className="w-4 h-4" /></button><button onClick={() => onDelete(contact.id)} className="p-1.5 text-slate-400 hover:text-red-500"><ICONS.Trash className="w-4 h-4" /></button></div>}
+        </div>
+      );
+    }
+    function SquadCard({ squad, oncalls, onClick, onEdit, onDelete, admin }) {
+      const members = useMemo(() => oncalls.filter(o => o.squadId === squad.id && !o.isLead), [oncalls, squad.id]);
+      const leads = useMemo(() => oncalls.filter(o => o.squadId === squad.id && o.isLead), [oncalls, squad.id]);
+      const currentOnCall = useMemo(() => members.filter(m => !m.isOff).sort((a,b) => (parseInt(a.orderIndex) || 99) - (parseInt(b.orderIndex) || 99))[0] || members[0], [members]);
+      return (
+        <div onClick={onClick} className="transition-premium bg-white border border-slate-200/70 rounded-2xl p-6 shadow-premium hover:border-brand-200 cursor-pointer flex flex-col justify-between group h-full relative">
+          <div><div className="flex items-start justify-between mb-4"><div><h3 className="font-display font-bold text-lg text-slate-900 group-hover:text-brand-600 transition-colors">{squad.name || "Squad"}</h3>{currentOnCall ? <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-emerald-500 pulse-dot" /> <strong className="text-slate-800 truncate max-w-[150px]">{currentOnCall.personName}</strong></p> : <p className="text-xs text-slate-400 mt-1 italic">Vazia</p>}</div><div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-brand-50 group-hover:text-brand-500 transition-all"><ICONS.ChevronRight className="w-4 h-4" /></div></div><div className="flex items-center gap-2 flex-wrap pt-2"><span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700">{members.filter(o => !o.isOff).length} Ativos</span>{leads.length > 0 && <span className="inline-flex items-center text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-100 text-amber-700"><ICONS.Star className="w-3 h-3 mr-1" />{leads.length} Líderes</span>}</div></div>
+          {admin && <div className="flex justify-end gap-1.5 mt-5 pt-4 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}><button onClick={() => onEdit(squad)} className="p-1.5 text-slate-400 hover:text-brand-500"><ICONS.Pencil className="w-4 h-4" /></button><button onClick={() => onDelete(squad.id)} className="p-1.5 text-slate-400 hover:text-red-500"><ICONS.Trash className="w-4 h-4" /></button></div>}
+        </div>
+      );
+    }
+    function CdCard({ cd, contacts, onClick, onEdit, onDelete, admin }) {
+      const activeContacts = useMemo(() => contacts.filter(c => c.cdId === cd.id), [contacts, cd.id]);
+      return (
+        <div onClick={onClick} className="transition-premium bg-white border border-slate-200/70 rounded-2xl p-6 shadow-premium hover:border-amber-300 cursor-pointer flex flex-col justify-between group h-full relative">
+          <div><div className="flex items-start justify-between mb-4"><div><h3 className="font-display font-bold text-lg text-slate-900 group-hover:text-amber-600 transition-colors">{cd.name || "CD"}</h3><p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1.5"><ICONS.MapPin className="w-3.5 h-3.5 text-slate-400" /> Logística</p></div><div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-600 transition-all"><ICONS.ChevronRight className="w-4 h-4" /></div></div><div className="flex items-center gap-2 flex-wrap pt-2"><span className="inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-100 text-amber-700"><ICONS.User className="w-3 h-3" /> {activeContacts.length} Ramais</span></div></div>
+          {admin && <div className="flex justify-end gap-1.5 mt-5 pt-4 border-t border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}><button onClick={() => onEdit(cd)} className="p-1.5 text-slate-400 hover:text-amber-600"><ICONS.Pencil className="w-4 h-4" /></button><button onClick={() => onDelete(cd.id)} className="p-1.5 text-slate-400 hover:text-red-500"><ICONS.Trash className="w-4 h-4" /></button></div>}
+        </div>
+      );
+    }
+
+    function DetailView({ squad, onBack, oncalls, onAdd, onEdit, onDelete, onReorder, onRotate, setToast, isLoading, admin }) {
+      const [showNewModal, setShowNewModal] = useState(false);
+      const [editingContact, setEditingContact] = useState(null);
+      const primaryOnCalls = useMemo(() => oncalls.filter(o => !o.isLead), [oncalls]);
+      const escalationLeads = useMemo(() => oncalls.filter(o => o.isLead), [oncalls]);
+      const handleOrderChange = (item, direction) => {
+        const index = primaryOnCalls.findIndex(o => o.id === item.id); if(index === -1) return;
+        const targetIndex = direction === 'up' ? index - 1 : index + 1; if(targetIndex < 0 || targetIndex >= primaryOnCalls.length) return;
+        const updatedList = [...primaryOnCalls]; updatedList[index] = updatedList[targetIndex]; updatedList[targetIndex] = item; onReorder(updatedList);
+      };
+      return (
+        <div className="space-y-8 page-enter">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-premium border border-slate-200/60 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-brand-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none opacity-80"></div>
+            <div className="flex items-start sm:items-center gap-5 relative z-10"><button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 hover:border-brand-200 text-slate-500 hover:text-brand-600 transition-all shadow-sm"><ICONS.ArrowLeft className="w-5 h-5" /></button><div><div className="flex items-center gap-2.5 mb-1.5"><span className="text-[10px] font-bold tracking-widest text-brand-500 uppercase">TI / NOC</span></div><h2 className="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">{squad.name}</h2></div></div>
+            <div className="flex items-center gap-3 relative z-10 w-full md:w-auto">
+              {admin && primaryOnCalls.length > 1 && <button onClick={onRotate} className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 px-5 py-3 bg-white border border-slate-200 hover:border-brand-200 rounded-2xl text-sm font-bold text-slate-700 hover:text-brand-600 transition-premium shadow-sm"><ICONS.Clock className="w-4 h-4 text-brand-500" /> Rotacionar</button>}
+              {admin && <button onClick={() => setShowNewModal(true)} className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 px-5 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-2xl text-sm font-bold transition-premium shadow-lg"><ICONS.Plus className="w-4 h-4" /> Novo Membro</button>}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2"><h3 className="font-display font-bold text-lg text-slate-900">Fila Principal</h3></div>
+              {isLoading ? <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{Array.from({length:2}).map((_,i)=><CardSkeleton key={i} />)}</div> : primaryOnCalls.length === 0 ? (
+                <div className="text-center py-16 px-6 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm relative overflow-hidden group"><div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><ICONS.UserPlus className="w-7 h-7 text-slate-400" /></div><h3 className="text-lg font-display font-bold text-slate-900 mb-2">Fila Vazia</h3>{admin && <button onClick={() => setShowNewModal(true)} className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold shadow-md"><ICONS.Plus className="w-4 h-4" /> Adicionar</button>}</div>
+              ) : (
+                <div className="space-y-3">{primaryOnCalls.map((o, idx) => (<div key={o.id} className="flex items-center gap-3 group/row">{admin && <div className="flex flex-col gap-1 opacity-0 group-hover/row:opacity-100 transition-opacity"><button disabled={idx === 0} onClick={() => handleOrderChange(o, 'up')} className="p-1 text-slate-400 hover:text-brand-500 disabled:opacity-20"><ICONS.ArrowUp className="w-3 h-3" /></button><button disabled={idx === primaryOnCalls.length - 1} onClick={() => handleOrderChange(o, 'down')} className="p-1 text-slate-400 hover:text-brand-500 disabled:opacity-20"><ICONS.ArrowDown className="w-3 h-3" /></button></div>}<div className="flex-1"><OnCallCard oncall={o} onEdit={setEditingContact} onDelete={onDelete} setToast={setToast} admin={admin} isLead={false} /></div></div>))}</div>
+              )}
+            </div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2"><h3 className="font-display font-bold text-lg text-amber-800">Escalação Nível 2</h3></div>
+              {isLoading ? <CardSkeleton /> : escalationLeads.length === 0 ? (
+                <div className="text-center py-10 px-4 bg-amber-50/30 rounded-3xl border border-dashed border-amber-200 flex flex-col items-center justify-center"><div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mb-3"><ICONS.Star className="w-5 h-5 text-amber-500" /></div><h3 className="text-sm font-bold text-amber-900 mb-1">Sem Liderança</h3>{admin && <button onClick={() => setShowNewModal(true)} className="mt-2 px-4 py-2 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl text-xs font-bold">Adicionar Líder</button>}</div>
+              ) : <div className="space-y-4">{escalationLeads.map(o => <OnCallCard key={o.id} oncall={o} onEdit={setEditingContact} onDelete={onDelete} setToast={setToast} admin={admin} isLead={true} />)}</div>}
+            </div>
+          </div>
+          {showNewModal && <Modal title="Novo Integrante" onClose={() => setShowNewModal(false)}><OnCallForm defaultValues={{orderIndex: primaryOnCalls.length + 1}} onSubmit={(v)=>{onAdd(v); setShowNewModal(false);}} /></Modal>}
+          {editingContact && <Modal title="Editar Registro" onClose={() => setEditingContact(null)}><OnCallForm defaultValues={editingContact} submitLabel="Atualizar" onSubmit={(v)=>{onEdit(editingContact.id, v); setEditingContact(null);}} /></Modal>}
+        </div>
+      );
+    }
+    function CdDetailView({ cd, onBack, contacts, onAdd, onEdit, onDelete, setToast, isLoading, admin }) {
+      const [showNewModal, setShowNewModal] = useState(false);
+      const [editingContact, setEditingContact] = useState(null);
+      return (
+        <div className="space-y-8 page-enter">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-premium border border-slate-200/60 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-amber-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none opacity-80"></div>
+            <div className="flex items-start sm:items-center gap-5 relative z-10"><button onClick={onBack} className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 hover:border-amber-200 text-slate-500 hover:text-amber-600 transition-all shadow-sm"><ICONS.ArrowLeft className="w-5 h-5" /></button><div><div className="flex items-center gap-2.5 mb-1.5"><span className="text-[10px] font-bold tracking-widest text-amber-600 uppercase">Centro de Distribuição</span></div><h2 className="font-display font-extrabold text-3xl sm:text-4xl text-slate-900 tracking-tight">{cd.name}</h2></div></div>
+            <div className="flex items-center gap-3 relative z-10 w-full md:w-auto">{admin && <button onClick={() => setShowNewModal(true)} className="flex-1 md:flex-none justify-center inline-flex items-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl text-sm font-bold transition-premium shadow-lg"><ICONS.Plus className="w-4 h-4" /> Novo Contato</button>}</div>
+          </div>
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-3"><h3 className="font-display font-bold text-lg text-slate-900 tracking-tight">Lista de Contatos e Ramais</h3></div>
+            {isLoading ? <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{Array.from({length:2}).map((_,i)=><CardSkeleton key={i} />)}</div> : contacts.length === 0 ? (
+              <div className="text-center py-16 px-6 bg-white rounded-3xl border border-dashed border-slate-300 shadow-sm relative overflow-hidden group"><div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mx-auto mb-4"><ICONS.Phone className="w-7 h-7 text-slate-400 group-hover:text-amber-500 transition-colors" /></div><h3 className="text-lg font-display font-bold text-slate-900 mb-2">Nenhum contato cadastrado</h3>{admin && <button onClick={() => setShowNewModal(true)} className="mt-4 inline-flex items-center gap-2 px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold shadow-md"><ICONS.Plus className="w-4 h-4" /> Cadastrar Contato</button>}</div>
+            ) : <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">{contacts.map((c) => <CdContactCard key={c.id} contact={c} onEdit={setEditingContact} onDelete={onDelete} setToast={setToast} admin={admin} />)}</div>}
+          </div>
+          {showNewModal && <Modal title="Novo Contato" onClose={() => setShowNewModal(false)}><CdContactForm defaultValues={{orderIndex: contacts.length + 1}} onSubmit={(v)=>{onAdd(v); setShowNewModal(false);}} /></Modal>}
+          {editingContact && <Modal title="Editar Contato" onClose={() => setEditingContact(null)}><CdContactForm defaultValues={editingContact} submitLabel="Atualizar Dados" onSubmit={(v)=>{onEdit(editingContact.id, v); setEditingContact(null);}} /></Modal>}
+        </div>
+      );
+    }
+
+    // === MÓDULO DE FILIAIS COM CRUD COMPLETO E BUSCA CORRIGIDA ===
+    function FiliaisView({ filiais, filialContacts, onBack, onAddFilial, onEditFilial, onDeleteFilial, onAddContact, onEditContact, onDeleteContact, admin, setToast }) {
+      const [search, setSearch] = useState("");
+      const [isImporting, setIsImporting] = useState(false);
+      
+      const [selectedFilial, setSelectedFilial] = useState(null);
+      const [showFilialModal, setShowFilialModal] = useState(false);
+      const [editingFilialData, setEditingFilialData] = useState(null);
+      
+      const [showContactModal, setShowContactModal] = useState(false);
+      const [editingContactData, setEditingContactData] = useState(null);
+      
+      const fileInputRef = useRef(null);
+
+      // --- FILTRO DE BUSCA CORRIGIDO E BLINDADO AQUI ---
+      const results = useMemo(() => {
+        if (!search) return [];
+        const q = search.toLowerCase().trim();
+        const filtered = filiais.filter(f => {
+          const paddedNum = padStoreNumber(f.storeNumber);
+          const bareNum = String(parseInt(f.storeNumber) || "");
+          return paddedNum.includes(q) || bareNum.includes(q) || String(f.name || "").toLowerCase().includes(q) || String(f.regional || "").toLowerCase().includes(q);
+        });
+        return filtered.sort((a, b) => (parseInt(a.storeNumber) || 0) - (parseInt(b.storeNumber) || 0)).slice(0, 50);
+      }, [search, filiais]);
+
+      const handleImportCSV = (e) => {
+        const file = e.target.files[0]; if (!file) return;
+        setIsImporting(true);
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const text = reader.result;
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) throw new Error("CSV Vazio ou sem dados");
+
+            const separator = lines[0].includes(";") ? ";" : ",";
+            const parseLine = (line) => {
+                let result = []; let inQuotes = false; let current = "";
+                for(let i=0; i<line.length; i++) {
+                    let char = line[i];
+                    if(char === '"') inQuotes = !inQuotes;
+                    else if(char === separator && !inQuotes) { result.push(current); current = ""; }
+                    else current += char;
+                }
+                result.push(current);
+                return result.map(s => s.trim().replace(/^"|"$/g, ''));
+            };
+
+            const headers = parseLine(lines[0]).map(h => h.toLowerCase());
+            const idxFilial = headers.findIndex(h => h === 'filial' || h === 'numero');
+            const idxNome = headers.findIndex(h => h === 'nome da loja' || h === 'nome');
+            const idxRegional = headers.findIndex(h => h === 'regional');
+            const idxGerente = headers.findIndex(h => h === 'nome regionais' || h === 'gerente');
+            const idxTelefone = headers.findIndex(h => h === 'telefone');
+            const idxEndereco = headers.findIndex(h => h.includes('endereço') || h.includes('endereco'));
+            const idxNumeroEnd = headers.findIndex(h => h === 'nº' || h === 'numero_end' || h === 'n');
+            const idxBairro = headers.findIndex(h => h.includes('bairro'));
+            const idxCep = headers.findIndex(h => h.includes('cep'));
+            const idxCidade = headers.findIndex(h => h.includes('cidade'));
+            const idxEstado = headers.findIndex(h => h.includes('estado'));
+            const idxHorario = headers.findIndex(h => h.includes('horário') || h.includes('horario'));
+            const idxDomingos = headers.findIndex(h => h.includes('domingos'));
+
+            if (idxFilial === -1) { alert("Não foi possível encontrar a coluna 'Filial' no arquivo."); setIsImporting(false); return; }
+
+            const dataRows = lines.slice(1);
+            const records = dataRows.map(row => {
+              const cols = parseLine(row);
+              if (!cols[idxFilial] || isNaN(parseInt(cols[idxFilial]))) return null; 
+              return { 
+                storeNumber: cols[idxFilial], name: idxNome !== -1 ? cols[idxNome] : "", regional: idxRegional !== -1 ? cols[idxRegional] : "", 
+                managerName: idxGerente !== -1 ? cols[idxGerente] : "", phone: idxTelefone !== -1 ? cols[idxTelefone] : "", address: idxEndereco !== -1 ? cols[idxEndereco] : "",
+                addressNumber: idxNumeroEnd !== -1 ? cols[idxNumeroEnd] : "", neighborhood: idxBairro !== -1 ? cols[idxBairro] : "", cep: idxCep !== -1 ? cols[idxCep] : "",
+                city: idxCidade !== -1 ? cols[idxCidade] : "", state: idxEstado !== -1 ? cols[idxEstado] : "", hours: idxHorario !== -1 ? cols[idxHorario] : "", openSunday: idxDomingos !== -1 ? cols[idxDomingos] : ""
+              };
+            }).filter(Boolean);
+
+            const chunks = [];
+            for (let i = 0; i < records.length; i += 400) chunks.push(records.slice(i, i + 400));
+            
+            for (const chunk of chunks) {
+              const batch = db.batch();
+              chunk.forEach(record => { batch.set(db.collection("filiais").doc(String(record.storeNumber)), record); });
+              await batch.commit();
+            }
+            logAction("Importar Lojas CSV", `${records.length} filiais detalhadas`);
+            setToast(`${records.length} filiais sincronizadas!`);
+          } catch (err) { console.error(err); alert("Erro ao processar arquivo."); } 
+          finally { setIsImporting(false); }
+        }; reader.readAsText(file);
+      };
+
+      const handleSaveFilial = (data) => {
+        if(editingFilialData) { onEditFilial(editingFilialData.storeNumber, data); } 
+        else { onAddFilial(data); }
+        setEditingFilialData(null); setShowFilialModal(false);
+      };
+
+      const handleSaveContact = (data) => {
+        if(editingContactData) { onEditContact(editingContactData.id, data); } 
+        else { onAddContact(selectedFilial.storeNumber, data); }
+        setEditingContactData(null); setShowContactModal(false);
+      };
+
+      const activeContactsForSelected = selectedFilial ? filialContacts.filter(c => c.storeNumber === selectedFilial.storeNumber) : [];
+
+      return (
+        <div className="space-y-8 page-enter max-w-5xl mx-auto">
+          <div className="flex items-center justify-between gap-4 border-b border-slate-200/60 pb-5">
+            <div className="flex items-center gap-4">
+              <button onClick={onBack} className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 shadow-sm"><ICONS.ArrowLeft className="w-4 h-4" /></button>
+              <h2 className="font-display font-extrabold text-2xl text-slate-900">Gestão de Filiais</h2>
+            </div>
+            {admin && (
+              <div className="flex gap-2">
+                <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleImportCSV} />
+                <button disabled={isImporting} onClick={() => fileInputRef.current?.click()} className="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50 rounded-xl text-xs font-bold transition-all"><ICONS.DocumentText className="w-4 h-4" /> {isImporting ? "Sincronizando..." : "Importar Planilha"}</button>
+                <button onClick={() => { setEditingFilialData(null); setShowFilialModal(true); }} className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-md"><ICONS.Plus className="w-4 h-4" /> Nova Filial</button>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white p-6 sm:p-10 rounded-[2rem] border border-slate-200/60 shadow-premium">
+            <div className="max-w-2xl mx-auto text-center mb-8">
+              <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mx-auto mb-5"><ICONS.Building className="w-8 h-8" /></div>
+              <h3 className="font-display font-bold text-2xl text-slate-900 mb-2">Qual filial você procura?</h3>
+              <p className="text-sm text-slate-500">Digite o número da loja, a cidade ou a regional para buscar ou editar.</p>
+            </div>
+            <div className="max-w-2xl mx-auto relative mb-10">
+              <ICONS.MagnifyingGlass className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-emerald-500" />
+              <input type="search" placeholder="Buscar por número, cidade ou regional..." className="w-full bg-slate-50 border-2 border-slate-200 rounded-2xl pl-14 pr-6 py-4 text-lg font-semibold text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-all shadow-inner" value={search} onChange={e => setSearch(e.target.value)} autoFocus />
+            </div>
+
+            {search.length >= 1 && results.length === 0 && <div className="text-center py-8"><p className="text-slate-500 font-medium">Nenhuma filial encontrada para "{search}".</p></div>}
+            
+            {results.length > 0 && (
+              <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div className="bg-slate-50 border-b border-slate-200 px-6 py-3 grid grid-cols-12 gap-4 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider"><div className="col-span-2">Número</div><div className="col-span-4">Filial / Cidade</div><div className="col-span-3">Gerência</div><div className="col-span-3 text-right">Ações</div></div>
+                <div className="divide-y divide-slate-100 bg-white max-h-[400px] overflow-y-auto">
+                  {results.map((f, i) => (
+                    <div key={i} className="px-6 py-3 grid grid-cols-12 gap-4 items-center hover:bg-emerald-50/50 transition-colors group">
+                      <div className="col-span-2 font-display font-bold text-slate-900">{padStoreNumber(f.storeNumber)}</div>
+                      <div className="col-span-4 cursor-pointer" onClick={() => setSelectedFilial(f)}>
+                        <p className="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{f.name}</p>
+                        {f.regional && <span className="inline-block mt-0.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">{f.regional}</span>}
+                      </div>
+                      <div className="col-span-3 text-xs font-medium text-slate-600">{f.managerName || "-"}</div>
+                      <div className="col-span-3 text-right flex items-center justify-end gap-1.5">
+                        <button onClick={() => setSelectedFilial(f)} className="p-2 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all"><ICONS.Eye className="w-4 h-4" /></button>
+                        {admin && <button onClick={() => { setEditingFilialData(f); setShowFilialModal(true); }} className="p-2 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all"><ICONS.Pencil className="w-4 h-4" /></button>}
+                        {admin && <button onClick={() => onDeleteFilial(f.storeNumber)} className="p-2 text-slate-400 hover:text-red-500 rounded-lg hover:bg-red-50 transition-all"><ICONS.Trash className="w-4 h-4" /></button>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {results.length === 50 && <div className="bg-slate-50 border-t border-slate-200 p-3 text-center text-xs font-bold text-slate-500">Exibindo os primeiros 50 resultados. Refine sua busca.</div>}
+              </div>
+            )}
+          </div>
+
+          {/* Modal Edição/Criação de Filial */}
+          {showFilialModal && <Modal title={editingFilialData ? "Editar Filial" : "Nova Filial"} onClose={() => {setShowFilialModal(false); setEditingFilialData(null);}}><FilialForm defaultValues={editingFilialData} onSubmit={handleSaveFilial} /></Modal>}
+
+          {/* Modal Raio-X Detalhes Completos */}
+          {selectedFilial && !showContactModal && (
+            <Modal title={`Filial ${padStoreNumber(selectedFilial.storeNumber)}`} onClose={() => setSelectedFilial(null)}>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="font-display font-bold text-2xl text-slate-900 tracking-tight">{selectedFilial.name}</h2>
+                  <div className="flex gap-2 mt-2">
+                    {selectedFilial.regional && <span className="inline-block text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">Reg: {selectedFilial.regional}</span>}
+                    {String(selectedFilial.openSunday).toLowerCase() === 'sim' && <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200">Abre aos Domingos</span>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                    <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5"><ICONS.MapPin className="w-3.5 h-3.5" /> Endereço Completo</h4>
+                    <p className="text-sm font-semibold text-slate-800 leading-relaxed">
+                      {selectedFilial.address ? `${selectedFilial.address}, ${selectedFilial.addressNumber || 'S/N'}` : "Endereço não cadastrado."}<br/>
+                      {selectedFilial.neighborhood && <span className="text-slate-500 font-medium">Bairro: {selectedFilial.neighborhood}</span>}<br/>
+                      {selectedFilial.city && selectedFilial.state && <span className="text-slate-500 font-medium">{selectedFilial.city} - {selectedFilial.state}</span>}
+                      {selectedFilial.cep && <span className="text-slate-500 font-medium"> | CEP: {selectedFilial.cep}</span>}
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><ICONS.Clock className="w-3.5 h-3.5" /> Horário</h4>
+                      <p className="text-sm font-semibold text-slate-800">{selectedFilial.hours || "Não informado"}</p>
+                    </div>
+                    <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                      <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1.5"><ICONS.User className="w-3.5 h-3.5" /> Gerência</h4>
+                      <p className="text-sm font-semibold text-slate-800">{selectedFilial.managerName || "Não informado"}</p>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                      <h4 className="font-display font-bold text-lg text-slate-900">Ramais e Contatos Extras</h4>
+                      {admin && <button onClick={() => setShowContactModal(true)} className="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-bold transition-colors"><ICONS.Plus className="w-3 h-3" /> Adicionar</button>}
+                    </div>
+
+                    {/* Contato Principal da Loja (Sempre exibido se existir) */}
+                    {selectedFilial.phone && selectedFilial.phone.length > 3 && (
+                      <div className="flex items-center justify-between p-3 mb-2 bg-emerald-50/50 border border-emerald-100 rounded-xl">
+                        <div>
+                          <p className="text-xs font-bold text-slate-900">Linha Principal / Loja</p>
+                          <p className="text-[11px] font-medium text-slate-500 flex items-center gap-1 mt-0.5"><ICONS.Phone className="w-3 h-3" /> {formatPhone(String(selectedFilial.phone))}</p>
+                        </div>
+                        <a href={`tel:${String(selectedFilial.phone).replace(/\D/g, "")}`} className="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-[10px] font-bold shadow-sm hover:bg-emerald-600 transition-colors">LIGAR</a>
+                      </div>
+                    )}
+
+                    {/* Contatos Adicionais (Ramais) */}
+                    {activeContactsForSelected.length === 0 ? (
+                      !selectedFilial.phone && <p className="text-xs text-slate-400 italic text-center py-4 border border-dashed border-slate-200 rounded-xl">Nenhum contato cadastrado.</p>
+                    ) : (
+                      <div className="space-y-2">
+                        {activeContactsForSelected.map(c => (
+                          <div key={c.id} className="flex items-center justify-between p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-200 transition-colors group">
+                            <div>
+                              <p className="text-xs font-bold text-slate-900">{c.personName}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                {c.role && <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">{c.role}</span>}
+                                <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1"><ICONS.Phone className="w-3 h-3" /> {formatPhone(String(c.phone))}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <a href={`tel:${String(c.phone).replace(/\D/g, "")}`} className="px-2 py-1.5 bg-slate-50 text-emerald-600 border border-slate-200 rounded-lg text-[10px] font-bold hover:bg-emerald-50 transition-colors">LIGAR</a>
+                              {admin && <button onClick={() => { setEditingContactData(c); setShowContactModal(true); }} className="p-1.5 text-slate-400 hover:text-emerald-600 transition-colors"><ICONS.Pencil className="w-3.5 h-3.5" /></button>}
+                              {admin && <button onClick={() => onDeleteContact(c.id)} className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"><ICONS.Trash className="w-3.5 h-3.5" /></button>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {/* Modal Edição/Criação de Ramal da Filial */}
+          {showContactModal && (
+            <Modal title={editingContactData ? "Editar Ramal" : `Novo Ramal - Loja ${selectedFilial?.storeNumber}`} onClose={() => {setShowContactModal(false); setEditingContactData(null);}}>
+              <FilialContactForm defaultValues={editingContactData} onSubmit={handleSaveContact} />
+            </Modal>
+          )}
+
+        </div>
+      );
+    }
+
+    function DashboardView({ squads, oncalls, onBack, isLoading, setToast }) {
+      const takeScreenshot = () => {
+        const tgt = document.getElementById("noc-dashboard"); if (!tgt) return; setToast("Gerando imagem contínua...");
+        html2canvas(tgt, { scale: 2, backgroundColor: "#fafbfc" }).then(canvas => { const url = canvas.toDataURL("image/png"); const a = document.createElement("a"); a.href = url; a.download = `Plantao_Geral.png`; a.click(); setToast("Imagem baixada!"); }).catch(err => { alert("Erro ao gerar imagem."); });
+      };
+      const liveDashboard = useMemo(() => {
+        return squads.map(s => {
+          const m = oncalls.filter(o => o.squadId === s.id && !o.isLead);
+          const l = oncalls.filter(o => o.squadId === s.id && o.isLead);
+          const active = m.filter(o => !o.isOff).sort((a,b) => (parseInt(a.orderIndex) || 99) - (parseInt(b.orderIndex) || 99));
+          return { ...s, current: active[0], total: m.length, leads: l };
+        }).sort((a,b) => String(a.name || "").localeCompare(String(b.name || "")));
+      }, [squads, oncalls]);
+
+      return (
+        <div className="space-y-8 page-enter">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-6"><div className="flex items-center gap-4"><button onClick={onBack} className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 shadow-premium"><ICONS.ArrowLeft className="w-4 h-4" /></button><div><span className="text-xs font-bold tracking-widest text-emerald-600 uppercase block mb-0.5">Monitoramento</span><h2 className="font-display font-extrabold text-2xl text-slate-900">Comando NOC</h2></div></div><button onClick={takeScreenshot} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border-2 border-brand-500 text-brand-600 rounded-xl text-xs font-bold shadow-premium"><ICONS.ArrowDownTray className="w-4 h-4" /> Exportar Imagem</button></div>
+          <div id="noc-dashboard" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-2 bg-[#fafbfc]">
+            {liveDashboard.map(box => (
+              <div key={box.id} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl flex flex-col justify-between hover:border-slate-700 transition-colors">
+                <div className="p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950/60"><h4 className="font-display font-bold text-slate-200 truncate pr-2">{box.name || "Sem Nome"}</h4><span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-800 px-2 py-0.5 rounded-md flex-shrink-0">{box.total} CP</span></div>
+                <div className="p-5 flex-1 flex flex-col justify-between min-h-[110px]">
+                  {box.current ? <div><div className="flex items-center gap-2.5 mb-2"><span className="w-2 h-2 rounded-full bg-emerald-400 pulse-dot" /><span className="text-sm font-bold text-white">{box.current.personName}</span></div>{box.current.phone && <a href={`tel:${String(box.current.phone).replace(/\D/g, "")}`} className="inline-flex items-center gap-1.5 text-xs text-brand-400"><ICONS.Phone className="w-3.5 h-3.5" /> {formatPhone(String(box.current.phone))}</a>}</div> : <p className="text-xs text-red-400/90 italic font-medium">⚠️ Sem operador ativo na fila</p>}
+                  {box.leads.length > 0 && <div className="mt-4 pt-3 border-t border-slate-800/80"><span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1.5">Liderança</span><div className="flex gap-2 flex-wrap">{box.leads.map(l => <span key={l.id} className="text-[11px] text-slate-300 bg-slate-800/60 border border-slate-700/80 px-2 py-0.5 rounded-md truncate max-w-[140px]">{l.personName}</span>)}</div></div>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function HistoryView({ onBack }) {
+      const [logs, setLogs] = useState([]); const [loading, setLoading] = useState(true);
+      useEffect(() => { db.collection('logs').orderBy('timestamp', 'desc').limit(50).get().then(snap => { setLogs(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoading(false); }).catch(() => setLoading(false)); }, []);
+      return (
+        <div className="space-y-8 page-enter">
+          <div className="flex items-center gap-4 border-b border-slate-200/60 pb-6"><button onClick={onBack} className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 text-slate-600 shadow-premium"><ICONS.ArrowLeft className="w-4 h-4" /></button><div><span className="text-xs font-bold tracking-widest text-slate-500 uppercase block mb-0.5">Segurança & Auditoria</span><h2 className="font-display font-extrabold text-2xl text-slate-900">Histórico de Alterações</h2></div></div>
+          <div className="bg-white border border-slate-200/80 rounded-2xl shadow-premium overflow-hidden">
+            {loading ? <div className="p-6 space-y-3">{Array.from({length:4}).map((_,i)=><div key={i} className="shimmer h-10 rounded-lg" />)}</div> : logs.length === 0 ? <div className="p-12 text-center text-slate-400 bg-slate-50/50">Nenhum registro encontrado.</div> : (
+              <div className="divide-y divide-slate-100">{logs.map(log => (<div key={log.id} className="p-4 sm:px-6 flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:bg-slate-50/60"><div className="space-y-1.5"><div className="flex items-center gap-2 flex-wrap"><span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${String(log.action || "").includes('Excluir') ? 'bg-red-50 text-red-700 border border-red-100' : 'bg-brand-50 text-brand-700 border border-brand-100'}`}>{log.action || "Ação"}</span><span className="font-semibold text-slate-800 text-sm">{log.target || "Sistema"}</span></div>{log.details && <p className="text-xs text-slate-500">{log.details}</p>}</div><div className="sm:text-right flex-shrink-0 bg-slate-50 sm:bg-transparent p-2 sm:p-0 rounded-lg"><span className="text-xs font-bold text-slate-700 block">{log.user || "Anônimo"}</span><span className="text-[11px] text-slate-400">{log.timestamp?.toDate()?.toLocaleString('pt-BR') || "Agora"}</span></div></div>))}</div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // --- MAIN APP ---
+    function EscalationApp() {
+      // States
+      const [squads, setSquads] = useState([]); const [oncalls, setOnCalls] = useState([]);
+      const [cds, setCds] = useState([]); const [cdContacts, setCdContacts] = useState([]);
+      const [filiais, setFiliais] = useState([]); const [filialContacts, setFilialContacts] = useState([]);
+      
+      const [query, setQuery] = useState("");
+      const [view, setView] = useState({ page: "portal", targetId: null });
+      const [user, setUser] = useState(null);
+      const [toast, setToastMsg] = useState(null);
+      
+      const [loadingState, setLoadingState] = useState({ squads: true, oncalls: true, cds: true, cdContacts: true, filiais: true, filialContacts: true });
+      
+      const [showSquadModal, setShowSquadModal] = useState(false); const [editingSquad, setEditingSquad] = useState(null);
+      const [showCdModal, setShowCdModal] = useState(false); const [editingCd, setEditingCd] = useState(null);
+      const [showImportModal, setShowImportModal] = useState(false);
+
+      const admin = !!user;
+      const setToast = (msg, type = "success") => setToastMsg({ msg, type });
+      const isLoading = loadingState.squads || loadingState.oncalls || loadingState.cds || loadingState.cdContacts || loadingState.filiais || loadingState.filialContacts;
+
+      useEffect(() => {
+        const unsubAuth = auth.onAuthStateChanged(setUser);
+        const unsubSquads = db.collection("squads").onSnapshot(snap => { setSquads(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, squads: false })); });
+        const unsubOnCalls = db.collection("oncalls").onSnapshot(snap => { setOnCalls(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, oncalls: false })); });
+        const unsubCds = db.collection("cds").onSnapshot(snap => { setCds(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, cds: false })); });
+        const unsubCdContacts = db.collection("cdContacts").onSnapshot(snap => { setCdContacts(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, cdContacts: false })); });
+        const unsubFiliais = db.collection("filiais").onSnapshot(snap => { setFiliais(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, filiais: false })); });
+        const unsubFilialContacts = db.collection("filialContacts").onSnapshot(snap => { setFilialContacts(snap.docs.map(d => ({ id: d.id, ...d.data() }))); setLoadingState(p => ({ ...p, filialContacts: false })); });
+        return () => { unsubAuth(); unsubSquads(); unsubOnCalls(); unsubCds(); unsubCdContacts(); unsubFiliais(); unsubFilialContacts(); };
+      }, []);
+
+      // FUNÇÕES SQUADS
+      const filteredSquads = useMemo(() => { if(!query.trim()) return squads; return squads.filter(s => String(s.name || "").toLowerCase().includes(String(query).toLowerCase())); }, [query, squads]);
+      const activeSquad = useMemo(() => squads.find(s => s.id === view.targetId), [view.targetId, squads]);
+      const activeOnCalls = useMemo(() => { return oncalls.filter(o => o.squadId === view.targetId).sort((a,b) => (parseInt(a.orderIndex) || 99) - (parseInt(b.orderIndex) || 99)) }, [view.targetId, oncalls]);
+
+      const handleAddSquad = async (p) => { const ref = await db.collection("squads").add(p); logAction("Criar Squad", p.name); setToast("Squad integrada."); };
+      const handleUpdateSquad = async (id, p) => { await db.collection("squads").doc(id).update(p); logAction("Editar Squad", p.name); setToast("Squad atualizada."); };
+      const handleDeleteSquad = async (id) => { const tgt = squads.find(s=>s.id===id); if(!confirm(`Excluir a squad "${tgt?.name}"?`)) return; const snap = await db.collection("oncalls").where("squadId", "==", id).get(); const batch = db.batch(); snap.forEach(d => batch.delete(d.ref)); batch.delete(db.collection("squads").doc(id)); await batch.commit(); logAction("Excluir Squad", tgt?.name); setToast("Squad removida."); setView({ page: "home", targetId: null }); };
+      const handleAddContact = async (p) => { await db.collection("oncalls").add({ ...p, squadId: view.targetId }); logAction("Adicionar Plantonista", p.personName); setToast("Plantonista adicionado."); };
+      const handleUpdateContact = async (id, p) => { await db.collection("oncalls").doc(id).update(p); logAction("Editar Plantonista", p.personName); setToast("Dados atualizados."); };
+      const handleDeleteContact = async (id) => { const tgt = oncalls.find(o=>o.id===id); if(!confirm(`Remover ${tgt?.personName}?`)) return; await db.collection("oncalls").doc(id).delete(); logAction("Excluir Plantonista", tgt?.personName); setToast("Removido."); };
+      const handleReorderContacts = async (list) => { const batch = db.batch(); list.forEach((item, idx) => { batch.update(db.collection("oncalls").doc(item.id), { orderIndex: idx + 1 }); }); await batch.commit(); setToast("Ordem salva."); };
+      const handleRotateQueue = async () => { const activePool = activeOnCalls.filter(o => !o.isLead && !o.isOff); if(activePool.length < 2) return; const [first, ...rest] = activePool; await handleReorderContacts([...rest, first]); logAction("Rotacionar Fila", activeSquad?.name); setToast("Rotação executada."); };
+
+      // FUNÇÕES CDs
+      const filteredCds = useMemo(() => { if(!query.trim()) return cds; return cds.filter(c => String(c.name || "").toLowerCase().includes(String(query).toLowerCase())); }, [query, cds]);
+      const activeCd = useMemo(() => cds.find(c => c.id === view.targetId), [view.targetId, cds]);
+      const activeCdContacts = useMemo(() => { return cdContacts.filter(c => c.cdId === view.targetId).sort((a,b) => (parseInt(a.orderIndex) || 99) - (parseInt(b.orderIndex) || 99)) }, [view.targetId, cdContacts]);
+
+      const handleAddCd = async (p) => { const ref = await db.collection("cds").add(p); logAction("Criar CD", p.name); setToast("CD adicionado."); };
+      const handleUpdateCd = async (id, p) => { await db.collection("cds").doc(id).update(p); logAction("Editar CD", p.name); setToast("CD atualizado."); };
+      const handleDeleteCd = async (id) => { const tgt = cds.find(c=>c.id===id); if(!confirm(`Excluir o CD "${tgt?.name}" e seus contatos?`)) return; const snap = await db.collection("cdContacts").where("cdId", "==", id).get(); const batch = db.batch(); snap.forEach(d => batch.delete(d.ref)); batch.delete(db.collection("cds").doc(id)); await batch.commit(); logAction("Excluir CD", tgt?.name); setToast("CD removido."); setView({ page: "cd", targetId: null }); };
+      const handleAddCdContact = async (p) => { await db.collection("cdContacts").add({ ...p, cdId: view.targetId }); logAction("Adicionar Ramal CD", p.personName); setToast("Contato adicionado."); };
+      const handleUpdateCdContact = async (id, p) => { await db.collection("cdContacts").doc(id).update(p); logAction("Editar Ramal CD", p.personName); setToast("Dados atualizados."); };
+      const handleDeleteCdContact = async (id) => { const tgt = cdContacts.find(c=>c.id===id); if(!confirm(`Remover ${tgt?.personName}?`)) return; await db.collection("cdContacts").doc(id).delete(); logAction("Excluir Ramal CD", tgt?.personName); setToast("Contato removido."); };
+
+      // FUNÇÕES FILIAIS (CRUD MANUAL)
+      const handleAddFilial = async (p) => { await db.collection("filiais").doc(String(p.storeNumber)).set(p); logAction("Criar Filial", `Loja ${p.storeNumber}`); setToast("Filial criada."); };
+      const handleUpdateFilial = async (id, p) => { await db.collection("filiais").doc(String(id)).update(p); logAction("Editar Filial", `Loja ${id}`); setToast("Filial atualizada."); };
+      const handleDeleteFilial = async (id) => { 
+        if(!confirm(`Excluir a loja ${id} e todos os seus ramais?`)) return; 
+        const snap = await db.collection("filialContacts").where("storeNumber", "==", id).get(); 
+        const batch = db.batch(); snap.forEach(d => batch.delete(d.ref)); 
+        batch.delete(db.collection("filiais").doc(String(id))); await batch.commit(); 
+        logAction("Excluir Filial", `Loja ${id}`); setToast("Filial removida."); 
+      };
+      
+      const handleAddFilialContact = async (storeNumber, p) => { await db.collection("filialContacts").add({ ...p, storeNumber }); logAction("Adicionar Ramal Loja", p.personName); setToast("Ramal adicionado."); };
+      const handleUpdateFilialContact = async (id, p) => { await db.collection("filialContacts").doc(id).update(p); logAction("Editar Ramal Loja", p.personName); setToast("Ramal atualizado."); };
+      const handleDeleteFilialContact = async (id) => { const tgt = filialContacts.find(c=>c.id===id); if(!confirm(`Remover o ramal ${tgt?.personName}?`)) return; await db.collection("filialContacts").doc(id).delete(); logAction("Excluir Ramal Loja", tgt?.personName); setToast("Ramal removido."); };
+
+      // BACKUP GLOBAL
+      function exportJson() {
+        const blob = new Blob([JSON.stringify({ squads, oncalls, cds, cdContacts, filiais, filialContacts }, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `backup-magalu-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url); logAction("Exportar Backup", "Base de Dados Completa");
+      }
+      function importJson(file) {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            const parsed = JSON.parse(reader.result); if (!parsed) { alert("Arquivo JSON inválido."); return; }
+            const batch = db.batch();
+            if(Array.isArray(parsed.squads)) parsed.squads.forEach(s => batch.set(db.collection("squads").doc(s.id || undefined), { name: String(s.name || "") }));
+            if(Array.isArray(parsed.oncalls)) parsed.oncalls.forEach(o => batch.set(db.collection("oncalls").doc(o.id || undefined), { squadId: o.squadId, personName: String(o.personName || ""), phone: String(o.phone || ""), hours: String(o.hours || ""), isLead: !!o.isLead, orderIndex: parseInt(o.orderIndex) || 99, observation: String(o.observation || ""), hasPhone: o.hasPhone !== false, subgroup: String(o.subgroup || ""), isOff: !!o.isOff }));
+            if(Array.isArray(parsed.cds)) parsed.cds.forEach(c => batch.set(db.collection("cds").doc(c.id || undefined), { name: String(c.name || "") }));
+            if(Array.isArray(parsed.cdContacts)) parsed.cdContacts.forEach(c => batch.set(db.collection("cdContacts").doc(c.id || undefined), { cdId: c.cdId, personName: String(c.personName || ""), phone: String(c.phone || ""), role: String(c.role || ""), orderIndex: parseInt(c.orderIndex) || 99, observation: String(c.observation || "") }));
+            if(Array.isArray(parsed.filialContacts)) parsed.filialContacts.forEach(c => batch.set(db.collection("filialContacts").doc(c.id || undefined), { storeNumber: c.storeNumber, personName: String(c.personName || ""), phone: String(c.phone || ""), role: String(c.role || ""), observation: String(c.observation || "") }));
+            
+            if(Array.isArray(parsed.filiais)) {
+               const chunks = [];
+               for (let i = 0; i < parsed.filiais.length; i += 400) chunks.push(parsed.filiais.slice(i, i + 400));
+               for (const chunk of chunks) {
+                 const filiaisBatch = db.batch();
+                 chunk.forEach(f => filiaisBatch.set(db.collection("filiais").doc(String(f.storeNumber)), { storeNumber: f.storeNumber, name: f.name, regional: f.regional, managerName: f.managerName, phone: f.phone, address: f.address, neighborhood: f.neighborhood, cep: f.cep, city: f.city, state: f.state, hours: f.hours, openSunday: f.openSunday, addressNumber: f.addressNumber }));
+                 await filiaisBatch.commit();
+               }
+            }
+            await batch.commit(); setToast("Backup restaurado com sucesso!"); logAction("Importar Backup JSON", `Arquivo: ${file.name}`);
+          } catch (e) { alert("Erro ao ler o arquivo JSON."); }
+        }; reader.readAsText(file);
+      }
+
+      return (
+        <div className="min-h-screen flex flex-col bg-[#fafbfc]">
+          <header className="sticky top-0 z-40 glass-nav">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 cursor-pointer select-none group" onClick={() => setView({ page: "portal", targetId: null })}>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center font-display font-black text-white text-sm shadow-md group-hover:shadow-brand-500/50 transition-all">Ω</div>
+                <h1 className="font-display font-bold text-slate-900 tracking-tight text-base sm:text-lg hidden min-[400px]:block">Contatos<span className="text-brand-600 font-medium text-xs ml-1 bg-brand-50 border border-brand-100 px-1.5 py-0.5 rounded-md">Magalu</span></h1>
+              </div>
+
+              {(view.page === 'home' || view.page === 'cd') && (
+                <div className="relative max-w-xs flex-1 hidden sm:block group">
+                  <ICONS.MagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
+                  <input type="search" placeholder="Filtrar por nome..." className="w-full bg-slate-100/80 border border-slate-200/50 rounded-xl pl-10 pr-4 py-2 text-xs font-medium focus:outline-none focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-500/10 transition-all" value={query} onChange={e=>setQuery(e.target.value)} />
+                </div>
+              )}
+
+              <div className="flex items-center gap-2 ml-auto sm:ml-0">
+                <button onClick={() => setView({ page: "dashboard" })} className={`px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all ${view.page === 'dashboard' ? 'bg-brand-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}><ICONS.Squares className="w-4 h-4" /> NOC</button>
+                <button onClick={() => setView({ page: "history" })} className={`px-3 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition-all ${view.page === 'history' ? 'bg-brand-500 text-white shadow-md' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'}`}><ICONS.Clock className="w-4 h-4" /> Auditoria</button>
+                {admin && view.page !== 'portal' && view.page !== 'filiais' && (
+                  <>
+                    <div className="h-6 w-px bg-slate-200 mx-1 hidden md:block" />
+                    <button onClick={exportJson} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all"><ICONS.ArrowDownTray className="w-4 h-4" /> Exportar</button>
+                    <button onClick={() => setShowImportModal(true)} className="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all"><ICONS.ArrowUpTray className="w-4 h-4" /> Importar</button>
+                  </>
+                )}
+                <div className="h-6 w-px bg-slate-200 mx-1" />
+                {user ? (
+                  <div className="flex items-center gap-2 bg-slate-100 border border-slate-200/60 p-1 rounded-xl shadow-inner">
+                    <img src={user.photoURL} alt="" className="w-6 h-6 rounded-lg object-cover ring-1 ring-slate-200" referrerPolicy="no-referrer" />
+                    <button onClick={() => auth.signOut()} className="text-[11px] font-bold text-slate-600 hover:text-red-500 px-1.5 transition-colors">Sair</button>
+                  </div>
+                ) : (
+                  <button onClick={() => auth.signInWithPopup(provider)} className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2 rounded-xl transition-all shadow-md">Acesso Restrito</button>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            {/* PORTAL GLOBAL */}
+            {view.page === "portal" && (
+              <div className="space-y-10 page-enter">
+                <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-brand-900 rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden shadow-2xl border border-slate-800">
+                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(0, 82, 255, 0.4) 0%, transparent 60%)' }} />
+                  <div className="relative z-10 max-w-2xl space-y-3">
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase bg-brand-500/20 border border-brand-500/30 text-brand-400 px-2.5 py-1 rounded-lg">Intranet Unificada</span>
+                    <h2 className="font-display font-extrabold text-3xl sm:text-5xl tracking-tight leading-none">Contatos Gerais Magalu</h2>
+                    <p className="text-slate-400 text-sm sm:text-base leading-relaxed">Portal centralizado de acionamento crítico e comunicação operacional. Escolha o setor abaixo para visualizar as matrizes de contato.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+                  <div onClick={() => setView({ page: "cd" })} className="transition-premium bg-white border border-slate-200/80 rounded-3xl p-6 shadow-premium hover:shadow-premium-hover hover:border-amber-400 cursor-pointer group flex flex-col justify-between min-h-[180px]">
+                    <div className="w-12 h-12 bg-amber-50 border border-amber-100 rounded-2xl flex items-center justify-center text-amber-600 group-hover:scale-110 transition-transform"><ICONS.Truck className="w-6 h-6" /></div>
+                    <div className="mt-6"><h3 className="font-display font-bold text-xl text-slate-900 group-hover:text-amber-600 transition-colors">Centros de Distribuição (CD)</h3><p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Contatos operacionais, logística, galpões corporativos e fluxos de emergência das regionais de distribuição.</p></div>
+                  </div>
+                  <div onClick={() => setView({ page: "filiais" })} className="transition-premium bg-white border border-slate-200/80 rounded-3xl p-6 shadow-premium hover:shadow-premium-hover hover:border-emerald-400 cursor-pointer group flex flex-col justify-between min-h-[180px]">
+                    <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform"><ICONS.Building className="w-6 h-6" /></div>
+                    <div className="mt-6"><h3 className="font-display font-bold text-xl text-slate-900 group-hover:text-emerald-600 transition-colors">Lojas & Filiais ({filiais.length})</h3><p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Matriz de contatos de gerências regionais, filiais físicas, links de suporte de rede de lojas e comercial.</p></div>
+                  </div>
+                  <div onClick={() => setView({ page: "home" })} className="transition-premium bg-white border border-slate-200/80 rounded-3xl p-6 shadow-premium hover:shadow-premium-hover hover:border-brand-500 cursor-pointer group flex flex-col justify-between min-h-[180px]">
+                    <div className="w-12 h-12 bg-brand-50 border border-brand-100 rounded-2xl flex items-center justify-center text-brand-500 group-hover:scale-110 transition-transform"><ICONS.Clock className="w-6 h-6" /></div>
+                    <div className="mt-6"><h3 className="font-display font-bold text-xl text-slate-900 group-hover:text-brand-600 transition-colors">Escalação & Plantões (NOC)</h3><p className="text-xs text-slate-500 mt-1.5 leading-relaxed">Gerenciamento das matrizes de acionamento das squads técnicas de TI, Engenharia de Software e redes.</p></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* MÓDULO FILIAIS */}
+            {view.page === "filiais" && (
+              <FiliaisView 
+                filiais={filiais} 
+                filialContacts={filialContacts}
+                onBack={() => setView({ page: "portal" })} 
+                onAddFilial={handleAddFilial}
+                onEditFilial={handleUpdateFilial}
+                onDeleteFilial={handleDeleteFilial}
+                onAddContact={handleAddFilialContact}
+                onEditContact={handleUpdateFilialContact}
+                onDeleteContact={handleDeleteFilialContact}
+                admin={admin} 
+                setToast={setToast} 
+              />
+            )}
+
+            {/* MÓDULO CD */}
+            {view.page === "cd" && (
+              <div className="space-y-8 page-enter">
+                <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-amber-900 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800">
+                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.4) 0%, transparent 60%)' }} />
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-2.5">
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2.5 py-1 rounded-lg"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 pulse-dot" /> Logística Integrada</span>
+                      <h2 className="font-display font-extrabold text-2xl sm:text-4xl tracking-tight">Centros de Distribuição</h2>
+                      <p className="text-slate-400 text-xs sm:text-sm max-w-xl leading-relaxed">Matriz de contatos diretos e ramais operacionais dos galpões de distribuição em todo o país.</p>
+                      <button onClick={() => setView({ page: "portal" })} className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 font-bold mt-2 transition-colors">← Voltar para Contatos Gerais</button>
+                    </div>
+                    <div className="flex gap-4 sm:gap-6 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md self-start md:self-center shadow-inner">
+                      <div className="text-center min-w-[60px]"><p className="font-display font-bold text-xl sm:text-2xl text-white">{cds.length}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Locais</p></div>
+                      <div className="w-px bg-white/10" />
+                      <div className="text-center min-w-[60px]"><p className="font-display font-bold text-xl sm:text-2xl text-amber-400">{cdContacts.length}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ramais</p></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                    <h3 className="font-display font-bold text-xl text-slate-900 tracking-tight">Galpões Regionais</h3>
+                    {admin && <button onClick={() => setShowCdModal(true)} className="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-900 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl transition-all shadow-md"><ICONS.Plus className="w-3.5 h-3.5" /> Criar CD</button>}
+                  </div>
+                  {isLoading ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">{Array.from({length:4}).map((_,i)=><CardSkeleton key={i} />)}</div> : filteredCds.length === 0 ? (
+                    <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm"><p className="text-sm font-medium text-slate-500">Nenhum Centro de Distribuição localizado.</p></div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredCds.sort((a,b)=>String(a.name||"").localeCompare(String(b.name||""))).map(cd => <CdCard key={cd.id} cd={cd} contacts={cdContacts} onClick={() => setView({ page: "cd_detail", targetId: cd.id })} onEdit={setEditingCd} onDelete={handleDeleteCd} admin={admin} />)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {view.page === "cd_detail" && activeCd && <CdDetailView cd={activeCd} contacts={activeCdContacts} onBack={() => setView({ page: "cd", targetId: null })} onAdd={handleAddCdContact} onEdit={handleUpdateCdContact} onDelete={handleDeleteCdContact} setToast={setToast} isLoading={isLoading} admin={admin} />}
+
+            {/* MÓDULO SQUADS/NOC */}
+            {view.page === "home" && (
+              <div className="space-y-8 page-enter">
+                <div className="bg-gradient-to-br from-slate-900 via-slate-950 to-brand-900 rounded-3xl p-6 sm:p-8 text-white relative overflow-hidden shadow-2xl border border-slate-800">
+                  <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(0, 82, 255, 0.4) 0%, transparent 60%)' }} />
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-2.5">
+                      <span className="inline-flex items-center gap-1.5 text-[10px] font-bold tracking-widest uppercase bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 pulse-dot" /> Matrizes NOC Ativas</span>
+                      <h2 className="font-display font-extrabold text-2xl sm:text-4xl tracking-tight">Fila de Escalação de Plantões</h2>
+                      <p className="text-slate-400 text-xs sm:text-sm max-w-xl leading-relaxed">Gerenciamento em tempo real de matrizes de acionamento emergencial das squads de engenharia.</p>
+                      <button onClick={() => setView({ page: "portal" })} className="inline-flex items-center gap-1 text-xs text-brand-400 hover:text-brand-300 font-bold mt-2 transition-colors">← Voltar para Contatos Gerais</button>
+                    </div>
+                    <div className="flex gap-4 sm:gap-6 bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md self-start md:self-center shadow-inner">
+                      <div className="text-center min-w-[60px]"><p className="font-display font-bold text-xl sm:text-2xl text-white">{squads.length}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Squads</p></div>
+                      <div className="w-px bg-white/10" />
+                      <div className="text-center min-w-[60px]"><p className="font-display font-bold text-xl sm:text-2xl text-brand-400">{oncalls.filter(o=>!o.isLead && !o.isOff).length}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ativos</p></div>
+                      <div className="w-px bg-white/10" />
+                      <div className="text-center min-w-[60px]"><p className="font-display font-bold text-xl sm:text-2xl text-amber-400">{oncalls.filter(o=>o.isLead).length}</p><p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Líderes</p></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                    <h3 className="font-display font-bold text-xl text-slate-900 tracking-tight">Matrizes de Squads</h3>
+                    {admin && <button onClick={() => setShowSquadModal(true)} className="inline-flex items-center gap-1.5 text-xs font-bold bg-slate-900 hover:bg-brand-600 text-white px-4 py-2.5 rounded-xl transition-all shadow-md"><ICONS.Plus className="w-3.5 h-3.5" /> Criar Squad</button>}
+                  </div>
+                  {isLoading ? <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">{Array.from({length:4}).map((_,i)=><CardSkeleton key={i} />)}</div> : filteredSquads.length === 0 ? (
+                    <div className="text-center py-16 bg-white border border-slate-200 rounded-2xl shadow-sm"><p className="text-sm font-medium text-slate-500">Nenhuma squad localizada.</p></div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredSquads.sort((a,b)=>String(a.name || "").localeCompare(String(b.name || ""))).map(squad => <SquadCard key={squad.id} squad={squad} oncalls={oncalls} onClick={() => setView({ page: "detail", targetId: squad.id })} onEdit={setEditingSquad} onDelete={handleDeleteSquad} admin={admin} />)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {view.page === "detail" && activeSquad && <DetailView squad={activeSquad} oncalls={activeOnCalls} onBack={() => setView({ page: "home", targetId: null })} onAdd={handleAddContact} onEdit={handleUpdateContact} onDelete={handleDeleteContact} onReorder={handleReorderContacts} onRotate={handleRotateQueue} setToast={setToast} isLoading={isLoading} admin={admin} />}
+
+            {/* VIEWS GERAIS (Dashboard e Histórico) */}
+            {view.page === "history" && <HistoryView onBack={() => setView({ page: "portal" })} />}
+            {view.page === "dashboard" && <DashboardView squads={squads} oncalls={oncalls} onBack={() => setView({ page: "portal" })} isLoading={isLoading} setToast={setToast} />}
+
+          </main>
+
+          <footer className="border-t border-slate-200/60 bg-white py-6 mt-12">
+            <div className="max-w-7xl mx-auto px-4 text-center text-xs font-medium text-slate-400">Contatos Gerais Magalu • Sistema Operacional e Logístico</div>
+          </footer>
+
+          {showSquadModal && <Modal title="Criar Nova Squad" onClose={() => setShowSquadModal(false)}><SquadForm onSubmit={(v)=>{handleAddSquad(v); setShowSquadModal(false);}} /></Modal>}
+          {editingSquad && <Modal title="Renomear Squad" onClose={() => setEditingSquad(null)}><SquadForm defaultValues={editingSquad} submitLabel="Atualizar Nome" onSubmit={(v)=>{handleUpdateSquad(editingSquad.id, v); setEditingSquad(null);}} /></Modal>}
+          {showCdModal && <Modal title="Criar Novo CD" onClose={() => setShowCdModal(false)}><CdForm onSubmit={(v)=>{handleAddCd(v); setShowCdModal(false);}} /></Modal>}
+          {editingCd && <Modal title="Renomear CD" onClose={() => setEditingCd(null)}><CdForm defaultValues={editingCd} submitLabel="Atualizar Nome" onSubmit={(v)=>{handleUpdateCd(editingCd.id, v); setEditingCd(null);}} /></Modal>}
+          {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} onImport={importJson} />}
+          {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToastMsg(null)} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("app")).render(<EscalationApp />);
+  </script>
+
+  <script>
+    (function () {
+      const source = document.getElementById('app-script').textContent;
+      const compiled = window.Babel.transform(source, {
+        presets: [['react', { runtime: 'classic' }]],
+        babelrc: false,
+        configFile: false
+      }).code;
+      new Function(compiled)();
+    })();
+  </script>
+</body>
+</html>
